@@ -1,5 +1,6 @@
 <?php
 include_once "includes/db_conn.php";
+echo "This is a conflict.";
 $searchkey="";
 if (isset($_GET['searchkey'])){
     $searchkey=htmlentities($_GET['searchkey']);  
