@@ -1,5 +1,6 @@
 <?php
 include_once "includes/db_conn.php";
+echo "This is a conflict.";
 include_once "includes/func.inc.php";
 $searchkey="";
 if (isset($_GET['searchkey'])){
