@@ -1,4 +1,5 @@
 <?php
+echo "This is a test change";
 if(isset($_POST['itemstatus'])){
 include_once "includes/db_conn.php";
     $itemname = htmlentities($_POST['itemname']);
