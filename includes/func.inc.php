@@ -1,12 +1,9 @@
 <?php
-function displayCat($conn,$bycolumn = "all", $string =""){
-    switch($bycolumn){
-        case 'all':
-             $sql = "SELECT * FROM `cate`;";
-             break;
-    }
-    
+function cleanstr($str){
+    return htmlentities($str);
 }
+
+
 
 function displayItemInfo($conn,$bycolumn = "all", $value = "" ){
     switch($bycolumn){
@@ -101,7 +98,124 @@ function fullDisplay($conn){
         return $arr;               //this is the return value
         mysqli_stmt_close($stmt);  //close the mysqli_statement
 }
+function fetchAddress($conn,$addressLevel,$param){
+if($param == "1"){
+    switch($addressLevel){
+        case 'B': $sql = "SELECT b.brgyCode
+                               , b.brgyDesc brgy_nm
+                               , c.citymunCode
+                               , c.citymunDesc citymun_nm
+                               , p.provCode
+                               , p.provDesc prov_nm
+                            FROM `refbrgy` b
+                            join `refcitymun` c 
+                              on (b.citymunCode = c.citymunCode)
+                            join `refprovince` p 
+                              on (p.provCode = c.provCode)
+                            WHERE ?
+                            ORDER BY b.brgyDesc ASC; ";
+        break;
+        case 'C': $sql = "SELECT c.citymunCode
+                               , c.citymunDesc citymun_nm
+                               , p.provCode
+                               , p.provDesc prov_nm
+                            FROM `refcitymun` c 
+                            join `refprovince` p 
+                              on (c.provCode = c.provCode)
+                            WHERE  ?
+                            ORDER BY c.citymunDesc ASC; ";
+        break;
+        case 'P': $sql = "SELECT p.provCode
+                               , p.provDesc prov_nm
+                            FROM `refprovince` p
+                            WHERE ?
+                            ORDER BY p.provDesc ASC;";
+        break;
+    }
+} else {
+    switch($addressLevel){
+        case 'B': $sql = "SELECT b.brgyCode
+                               , b.brgyDesc brgy_nm
+                               , c.citymunCode
+                               , c.citymunDesc citymun_nm
+                               , p.provCode
+                               , p.provDesc prov_nm
+                            FROM `refbrgy` b
+                            join `refcitymun` c 
+                              on (b.citymunCode = c.citymunCode)
+                            join `refprovince` p 
+                              on (p.provCode = c.provCode)
+                            WHERE c.citymunCode = ?
+                            ORDER BY b.brgyDesc ASC; ";
+        break;
+        case 'C': $sql = "SELECT c.citymunCode
+                               , c.citymunDesc citymun_nm
+                               , p.provCode
+                               , p.provDesc prov_nm
+                            FROM `refcitymun` c 
+                            join `refprovince` p 
+                              on (c.provCode = p.provCode)
+                           WHERE p.provCode = ?
+                           ORDER BY c.citymunDesc ASC; ";
+        break;
+        case 'P': $sql = "SELECT p.provCode
+                               , p.provDesc prov_nm
+                            FROM `refprovince` p
+                            WHERE ?
+                            ORDER BY p.provDesc ASC;";
+        break;
+    }
+}
+    
+    
+    $stmt=mysqli_stmt_init($conn);
+    if (!mysqli_stmt_prepare($stmt, $sql)){
+        header("location:index.php?error=stmtfailed");
+        exit();
+    }
+    
+        mysqli_stmt_bind_param($stmt, "s" , $param);
+        mysqli_stmt_execute($stmt);
+        $resultData = mysqli_stmt_get_result($stmt);
+        $arr = array();            //initialize an empty array
+        while($row = mysqli_fetch_assoc($resultData)){
+            array_push($arr,$row);            
+        }
+        return $arr;               //this is the return value
+        mysqli_stmt_close($stmt);  //close the mysqli_statement
+}
 
+function getAddressDesc($conn, $level, $param){
+    switch($level){
+        case 'B': $sql = "SELECT brgyDesc FROM `refbrgy` WHERE brgyCode = ?;"; break;
+        case 'C': $sql = "SELECT citymunDesc FROM `refcitymun` WHERE citymunCode = ?;"; break;
+        case 'P': $sql = "SELECT provDesc FROM `refprovince` WHERE provCode = ?;"; break;
+            
+    }
+    $stmt=mysqli_stmt_init($conn);
+    
+    if (!mysqli_stmt_prepare($stmt, $sql)){
+        $err=false;
+        return $err;
+        exit;
+    }
+        mysqli_stmt_bind_param($stmt, "s" ,$param);
+        mysqli_stmt_execute($stmt);
+        $resultData = mysqli_stmt_get_result($stmt);
+        
+        if($row = mysqli_fetch_assoc($resultData)){
+            switch($level){
+                case 'B':  return $row['brgyDesc']; break;
+                case 'C':  return $row['citymunDesc']; break;
+                case 'P':  return $row['provDesc']; break;
+            }
+        }
+        else{
+            $err=false;
+            return $err;
+        }
+        mysql_stmt_close($stmt);
+}
 
 function createUser($conn,$username,$password,$usertype){
     $err;
