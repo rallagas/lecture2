@@ -12,22 +12,16 @@
      <?php
     include_once "../includes/db_conn.php";
     include_once "../includes/func.inc.php";
-      if(isset($_POST['Search'])){
-          if(isset($_POST['categ'])){
-               $cat = array();
-              foreach($_POST['categ'] as $catid){
-              array_push($cat, $catid);
-              }
-             $iteminfo = displayItemInfo($conn,"like_name",htmlentities($_POST['Search']), $cat);       
+      if(isset($_POST['categ'])){
+          $cat = array();
+          if(count($_POST['categ']) > 0){
+             foreach($_POST['categ'] as $catid){
+                 array_push($cat, $catid);
+              } 
+              $iteminfo = displayItemInfo($conn,$searchKey,$cat);       
           }
-          else{
-             $iteminfo = displayItemInfo($conn,"like_name",htmlentities($_POST['Search']));       
-          }
-         
-      }
-      else{
-          $iteminfo = displayItemInfo($conn);  
-      }
+          $iteminfo = displayItemInfo($conn,$searchKey);                    
+      } 
           if(!empty($iteminfo)){
           foreach($iteminfo as $key => $i){ ?>
                           
@@ -67,6 +61,5 @@
 
 </body>
 <script src="../js/bootstrap.min.js"></script>
-<script src="../js/jquery-3.5.1.min.js"></script>
 
 </html>

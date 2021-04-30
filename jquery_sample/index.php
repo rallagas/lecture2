@@ -66,7 +66,7 @@
                 <?php } ?>
             <div class="input-group">
                
-             <input type="text" id="searchBar" class="form-control" name="Search">  
+             <input type="text" id="searchBar" class="form-control" name="Search" value="">  
              <button class="btn btn-link" id="searchbtn"> <i class="bi bi-search"></i> </button>   
              
              <p class="form-text lead" id="searchStat"></p>
@@ -81,6 +81,6 @@
 </body>
 <script src="../js/bootstrap.min.js"></script>
 <script src="../js/jquery-3.5.1.min.js"></script>
-<script src="../js/ajax.js"></script>
+<script src="own_ajax.js"></script>
 
 </html>

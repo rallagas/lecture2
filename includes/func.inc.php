@@ -15,130 +15,15 @@ function setisEmpty(){
     return $bool_empty;
 }
 
-function displayItemInfo($conn,$bycolumn = "all", $value = "", $cat = array() ){
-    if( sizeof($cat) < 1 ) {
-            switch($bycolumn){
-            case 'all': 
-                     $sql = "SELECT i.item_id item_id
-                                  , i.item_img
-                                  , c.cat_desc cat_desc
-                                  , i.item_short_code item_short_code
-                                  , i.item_name item_name
-                                  , i.item_price item_price
-                               FROM `items` as i
-                               JOIN `category` as c
-                                 ON i.cat_id = c.cat_id
-                                 where ?";
-                     $value = 1;
-            break;
-            case 'exact_name': 
-                     $sql = "SELECT i.item_id item_id
-                                  , i.item_img
-                                  , c.cat_desc cat_desc
-                                  , i.item_short_code item_short_code
-                                  , i.item_name item_name
-                                  , i.item_price item_price
-                               FROM `items` as i
-                               JOIN `category` as c
-                                 ON i.cat_id = c.cat_id
-                              WHERE I.item_name = ?
-                                AND ? ;";
-                     $value = $value;
-            break;
-            case 'like_name': 
-                     $sql = "SELECT i.item_id item_id
-                                  , i.item_img
-                                  , c.cat_desc cat_desc
-                                  , i.item_short_code item_short_code
-                                  , i.item_name item_name
-                                  , i.item_price item_price
-                               FROM `items` as i
-                               JOIN `category` as c
-                                 ON i.cat_id = c.cat_id
-                              WHERE i.item_name like ?;";
-                     $value = "%{$value}%";
-            break;
-            default: $sql = "SELECT i.item_id item_id
-                                  , i.item_img
-                                  , c.cat_desc cat_desc
-                                  , i.item_short_code item_short_code
-                                  , i.item_name item_name
-                                  , i.item_price item_price
-                               FROM `items` as i
-                               JOIN `category` as c
-                                 ON i.cat_id = c.cat_id
-                               WHERE 1 = ?;";
-                    $value = 1;
-            break;
+function displayItemInfo($conn, $value = "", $category = array()){
+    if(sizeof($category) > 0){
+        $catStr = "0";
+        foreach($category as $cat){
+            $catStr .= "," . $cat;
         }
-    }
-    else{
-        $cat_filter = "0";
-        if(sizeof($cat) > 1){
-           foreach($cat as $cat_id){
-            $cat_filter .= ", '{$cat_id}'";
-           }
-        }
-        else{
-            $cat_filter = $cat[0];
-        }
-            switch($bycolumn){
-            case 'all': 
-                     $sql = "SELECT i.item_id item_id
-                                  , i.item_img
-                                  , c.cat_desc cat_desc
-                                  , i.item_short_code item_short_code
-                                  , i.item_name item_name
-                                  , i.item_price item_price
-                               FROM `items` as i
-                               JOIN `category` as c
-                                 ON i.cat_id = c.cat_id
-                                 WHERE 1 = ?
-                                   and i.cat_id in ( {$cat_filter} )";
-                     $value = 1;
-            break;
-            case 'exact_name': 
-                     $sql = "SELECT i.item_id item_id
-                                  , i.item_img
-                                  , c.cat_desc cat_desc
-                                  , i.item_short_code item_short_code
-                                  , i.item_name item_name
-                                  , i.item_price item_price
-                               FROM `items` as i
-                               JOIN `category` as c
-                                 ON i.cat_id = c.cat_id
-                              WHERE I.item_name = ?
-                                AND i.cat_id in ( {$cat_filter} );";
-                     $value = $value;
-            break;
-            case 'like_name': 
-                     $sql = "SELECT i.item_id item_id
-                                  , i.item_img
-                                  , c.cat_desc cat_desc
-                                  , i.item_short_code item_short_code
-                                  , i.item_name item_name
-                                  , i.item_price item_price
-                               FROM `items` as i
-                               JOIN `category` as c
-                                 ON i.cat_id = c.cat_id
-                              WHERE i.item_name like ?
-                                AND i.cat_id in ( {$cat_filter} ) ;";
-                     $value = "%{$value}%";
-            break;
-            default: $sql = "SELECT i.item_id item_id
-                                  , i.item_img
-                                  , c.cat_desc cat_desc
-                                  , i.item_short_code item_short_code
-                                  , i.item_name item_name
-                                  , i.item_price item_price
-                               FROM `items` as i
-                               JOIN `category` as c
-                                 ON i.cat_id = c.cat_id
-                               WHERE 1 = ? 
-                                 AND i.cat_id in ( {$cat_filter} );";
-                     $value = 1;
-            break;
-        }
+        $sql="SELECT * from items WHERE cat_id in ( {$catStr} ) AND item_name like ? ;";
+    }else{
+        $sql="SELECT * from items WHERE item_name like ? ;";
     }
     
     $stmt=mysqli_stmt_init($conn);
@@ -146,6 +31,7 @@ function displayItemInfo($conn,$bycolumn = "all", $value = "", $cat = array() ){
         header("location:index.php?error=stmtfailed");
         exit();
     }
+    $value = "%{$value}%" ;
         mysqli_stmt_bind_param($stmt, "s" , $value);
         mysqli_stmt_execute($stmt);
         $resultData = mysqli_stmt_get_result($stmt);
