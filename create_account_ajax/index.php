@@ -1,7 +1,6 @@
 <?php
-include_once "../includes/db_conn.php"; 
+include_once "../includes/db_conn.php";
 include_once "../includes/func.inc.php";
-//included changes
 ?>
 <html>
 <head>
@@ -9,7 +8,6 @@ include_once "../includes/func.inc.php";
     <title>Lecture : SQL Integration with PHP</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="../font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../css/custom.css">
 </head>
 <body>
 
