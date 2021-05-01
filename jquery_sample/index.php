@@ -66,7 +66,7 @@
                 <?php } ?>
             <div class="input-group">
                
-             <input type="text" id="searchBar" class="form-control" name="Search" value="">  
+             <input type="text" id="searchBar" class="form-control" name="Search" value=" ">  
              <button class="btn btn-link" id="searchbtn"> <i class="bi bi-search"></i> </button>   
              
              <p class="form-text lead" id="searchStat"></p>

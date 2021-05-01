@@ -21,7 +21,7 @@ function loadItems(formd){
       });
  }
 
-$("form#FormSearch").on("keyup","input:text#searchBar", function(){
+$("form#FormSearch").on("click","button#searchbtn", function(){
     loadItems(this);   
 });
 
