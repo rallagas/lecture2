@@ -1,9 +1,8 @@
 <?php
 session_start();
-
 include_once "../includes/db_conn.php";
 include_once "../includes/func.inc.php";
-$searchkey="";
+$searchkey=NULL;
 if (isset($_GET['searchkey'])){
     $searchkey=htmlentities($_GET['searchkey']);  
 }
@@ -13,14 +12,15 @@ if (isset($_GET['searchkey'])){
     <meta charset="UTF-8">
     <title>Lecture : SQL Integration with PHP</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/custom.css">
     <link rel="stylesheet" href="../font/bootstrap-icons.css">
 </head>
 <body>
        
 <div class="container-fluid">
-    <div class="row" id="NavigationPanel">
+    <div class="row pt-5" id="NavigationPanel">
         <!-- Navigation Bar -->
-        <nav class="navbar navbar-expand-lg bg-light text-white shadow">
+        <nav class="navbar navbar-expand-lg bg-light text-white shadow fixed-top">
             <div class="container-fluid">
              <a href="index.php" class="navbar-brand btn btn-no-border-orange pb-3"> 
                 <i class="bi bi-house"></i> 
@@ -45,6 +45,17 @@ if (isset($_GET['searchkey'])){
                     </a>
                     <!--Navigation button to show the form to add item button--->
                  </li>
+                 
+                 <?php 
+                   $cat_nav = getCategories($conn); 
+                   if(!empty($cat_nav) || $cat_nav !== false){
+                       foreach($cat_nav as $cat_key => $cat_val){?>
+                           <li class="nav-item"><a href="#cat<?php echo $cat_val['cat_id'];?>" class="nav-link btn btn-link"> <?php echo $cat_val['cat_desc'];?> </a></li>
+                       <?php }
+                   }
+                   ?>
+                 
+                 
                  <li class="nav-item">
                      <a href="../jquery_sample/index.php" class="nav-link btn btn-no-border-orange"> 
                         <i class="bi bi-app-indicator"></i> Jquery Sample
@@ -70,7 +81,7 @@ if (isset($_GET['searchkey'])){
          <!--end Navigation Bar -->
     </div>
     
-    <div class="row mx-3">
+    <div class="row mx-3 mt-3" id="ProcessesPanel">
         <div class="col-12">
             <?php if(isset($_GET['error'])){
                     
@@ -98,7 +109,7 @@ if (isset($_GET['searchkey'])){
                 <div class="container-fluid">
                     <div class="row">
                     <h3 class="display-6">
-                       <?php $summary = getCartSummary($conn, $_SESSION['user_id']); 
+                       <?php $summary = getCartSummary($conn, $_SESSION['user_id']);
                         foreach($summary as $key => $nval){
                            echo "(". $nval['total_qty'] . " pcs )";    
                         }
@@ -107,17 +118,19 @@ if (isset($_GET['searchkey'])){
                        
                     </h3>
                      <?php
-                      $sql_cart_list = "SELECT c.cart_id
-                                             , i.item_name
+                      $sql_cart_list = "SELECT i.item_name
                                              , i.item_img
                                              , i.item_price
-                                             , c.item_qty
-                                             , c.user_id
+                                             , sum(c.item_qty) total_item_qty
+                                             , sum(c.item_qty * i.item_price)  total_order_amt
                                           FROM cart c
                                           JOIN items i
                                             ON c.item_id = i.item_id
                                          WHERE c.user_id = ? 
-                                            AND c.status = 'P'; ";
+                                            AND c.status = 'P'
+                                            group by i.item_name
+                                             , i.item_img
+                                             , i.item_price; ";
                       $stmt=mysqli_stmt_init($conn);
     
                     if (!mysqli_stmt_prepare($stmt, $sql_cart_list)){
@@ -128,44 +141,47 @@ if (isset($_GET['searchkey'])){
                         mysqli_stmt_execute($stmt);
 
                         $resultData = mysqli_stmt_get_result($stmt);
-
+                    if(!empty($resultData)){
+                        
                         while($row = mysqli_fetch_assoc($resultData)){ ?>
                             <div class="col-2">
                                 <div class="card shadow">
-                                    <img src="../images/<?php echo $row['item_img'];?>" alt="" class="card-img-top">
-                                    <div class="card-header">
+                                    <img src="../images/<?php echo $row['item_img'] == '' ? "200x200.png" : $row['item_img']; ?>" alt="1 x 1" class="card-img-top" style=" height: 100px; width=100px; object-fit: cover">   
+                                    <div class="card-body">
                                          <p class="card-title"><?php echo $row['item_name'] 
-                                                           . "( Php " . number_format($row['item_price'],2)  . ")"  ;?> 
+                                                           . "( Php " . number_format($row['item_price'],2)  
+                                                           . ") x ". $row['total_item_qty']  ;?> 
                                     </p>
                                     </div>
                                     <div class="card-footer">
-                                        <form action="includes/updatecart.php" method="post">
-                                           <input hidden type="text" name="cart_id" value="<?php echo $row['cart_id']; ?>">
-                                            <div class="input-group">
-                                                <input type="text" class="form-control form-control-sm" name="item_qty" value="<?php echo $row['item_qty']; ?>">
-                                                <button class="btn btn-primary"> <i class="bi bi-bag-check"></i> </button>
-                                                <a href="includes/deletecartitem.php?cartid=<?php echo $row['cart_id']; ?>" class="btn btn-danger">
-                                                     <i class="bi bi-trash"></i>
-                                                </a>
-                                            </div>
-                                        </form>
+                                        <?php echo "Php" . number_format($row['total_order_amt'],2);  ?>
                                         
                                     </div>
+
                                 </div>
                             </div>
                         <?php }
-                       
+                    
                         ?>
                         <hr>
                     <p class="lead">
                     <?php $summary = getCartSummary($conn, $_SESSION['user_id']); 
+                    if(!empty($summary)){
                         foreach($summary as $key => $nval){
                            echo "Total Qty: ". $nval['total_qty'] . " pcs |";  
                            echo "Total Price: Php ". number_format($nval['total_price'],2);    
                         }
-                        
-                        ?> 
+                    echo "<br>If you need more. you can always order more below :)";
+                    }
+                    else{
+                     echo "You have to order something from below";   
+                    } 
+                    }
+                    ?>
                     </p>
+                       
+                    
+                        
                     
                     </div>
                 </div>
@@ -173,110 +189,58 @@ if (isset($_GET['searchkey'])){
             
         </div>
     </div>
-    <div class="row">
+    <div class="row" id="MenuList">
         <div class="col-12">
-        <h3 class="display-3">Menu</h3>
-        <?php
-            //check if searchkey has no value
-        if($searchkey == "") {
-            //declare the SQL
-           $sql = "SELECT i.item_id
-                     , i.item_name
-                     , i.item_short_code
-                     , c.cat_desc
-                     , i.item_price
-                     , i.item_img
-                  FROM `items` i
-                  JOIN `category` c
-                    ON i.cat_id = c.cat_id ;";
-        
-            //initialize connection to the database.
-        $stmt=mysqli_stmt_init($conn);
-            //prepare the statement
-         if (!mysqli_stmt_prepare($stmt, $sql)){
-        echo "Statement Failed.";
-        exit();
-         }
-        }
-            //check if searchkey has value
-        else{
-            //initialize SQL
-            $sql = "SELECT i.item_id
-                     , i.item_name
-                     , i.item_short_code
-                     , c.cat_desc
-                     , i.item_price
-                     , i.item_img
-                  FROM `items` i
-                  JOIN `category` c
-                    ON i.cat_id = c.cat_id
-                 WHERE i.item_name LIKE ?
-                    OR i.item_short_code = ?
-                    OR c.cat_desc = ?
-                    OR i.item_price = ?;";
-        //initialize connection
-        $stmt=mysqli_stmt_init($conn);
-        //prepare statement
-         if (!mysqli_stmt_prepare($stmt, $sql)){
-            echo "Something went wrong.";
-            exit();
-         }
-        //initialize search key with Wild Card for itemnames
-        $itemname="%{$searchkey}%";
-        //bind the statement with the string in the search key. since we can declare a variable
-        // multiple times, we can re-instate binding of a statement from each of the WHERE clause "?"
-        // from the declared SQL variable string.
-        mysqli_stmt_bind_param($stmt, "ssss" , $itemname, $searchkey, $searchkey, $searchkey);
-        }
-        //finally, whichever the situation, it will execute the statement
-         mysqli_stmt_execute($stmt);
-         
-        //get the results of the executed statement and put it into a variable
-         $resultData = mysqli_stmt_get_result($stmt);
-        //declare a container array.
-         $arr=array();
-         while($row = mysqli_fetch_assoc($resultData)){
-             //we will do the transfer of data to another array to test if there is a result.
-             array_push($arr,$row);
-         }
-         // if the new array is not empty, display the tabular representation
-         // as HTML
-         if(!empty($arr)){
-            
-             ?>
              <div class="container-fluid">
                  <div class="row px-3">
-                 
-             <?php
-            foreach($arr as $key => $val){ ?>
-            <div class="col-3">
-                <div class="card">
-                   <img src="../images/<?php echo $val['item_img']; ?>" alt="1 x 1" width="100px" class="card-img-top">
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo $val['item_name']?></h5>
-                        <p class="card-text"><?php echo $val['item_short_code']; ?></p>
-                        <em class="card-text" > Php <?php echo number_format($val['item_price'],2); ?> </em>
-                    </div>
-                    <div class="card-footer">
-                        <form action="../includes/processorder.php" method="get">
-                            <input hidden type="text" name="item_id" value="<?php echo $val['item_id']; ?>" >
-                            <div class="input-group">
-                               <input class="form-control" type="number" name="item_qty" value="" >    
-                               <button type="submit" class="btn btn-primary"> <i class="bi bi-cart-plus"></i> </button>
-                            </div>
-                        </form>
+
+<?php
+    $category_list = getCategories($conn);
+    if(!empty($category_list) || $category_list !== false){
+        foreach($category_list as $categ_key => $cat){
+        echo "<marker id='cat".$cat['cat_id']."' class='mt-5 mb-5'></marker>";
+            
+        echo "<br><br><h3 class='display-6'>".$cat['cat_desc']."</h3>";
+             $menu = showMenu($conn, $cat['cat_id'], $searchkey);
+             if(!empty($menu) || $menu !== false ){
+                foreach($menu as $key => $val){ ?>
+                <div class="col-lg-2 col-md-6 col-sm-6">
+                    <div class="card">
+                       <img src="../images/<?php echo $val['item_img'] == '' ? "200x200.png" : $val['item_img']; ?>" alt="1 x 1" class="card-img-top" style=" height: 300px; width=300px; object-fit: cover">   
+                       
+                        <div class="card-body">
+                            <h5 class="card-title"><?php echo $val['item_name']?></h5>
+                            <p class="card-text"><?php echo $val['item_short_code']; ?></p>
+                            <em class="card-text" > Php <?php echo number_format($val['item_price'],2); ?> </em>
+                        </div>
+                        <div class="card-footer">
+                            <form action="../includes/processorder.php" method="get">
+                                <input hidden type="text" name="item_id" value="<?php echo $val['item_id']; ?>" >
+                                <div class="container">
+                                   <div class="row">
+                                       <div class="col-lg-3"></div>
+                                       <div class="col-lg-6">
+                                            <div class="input-group">
+                                               <input class="form-control" type="number" name="item_qty" value="1" >    
+                                               <button type="submit" class="btn btn-primary"> <i class="bi bi-cart-plus"></i> </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3"></div>
+                                   </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <?php }
-           echo "</div>";
-        echo "</div>";
-         }
-         else{
-             echo "<h4> No Records Found.</h4>";
-         }
-        ?>
+
+                <?php }
+             }
+             else{
+                 echo "<h4> No Records Found.</h4>";
+             }   
+        }
+    }
+?>
         </div>
         
     </div>

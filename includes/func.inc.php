@@ -15,6 +15,83 @@ function setisEmpty(){
     return $bool_empty;
 }
 
+function showMenu($conn, $cat = null, $searchkey = null){
+  if($searchkey == null){
+       if($cat == null) {
+            //declare the SQL
+           $sql = "SELECT i.item_id
+                     , i.item_name
+                     , i.item_short_code
+                     , c.cat_desc
+                     , i.item_price
+                     , i.item_img
+                  FROM `items` i
+                  JOIN `category` c
+                    ON i.cat_id = c.cat_id ;";
+        
+        $stmt=mysqli_stmt_init($conn);
+        if (!mysqli_stmt_prepare($stmt, $sql)){
+           return false;
+           exit();
+         }
+      }
+      else
+      {  //check if $cat has value
+            $sql = "SELECT i.item_id
+                     , i.item_name
+                     , i.item_short_code
+                     , c.cat_desc
+                     , i.item_price
+                     , i.item_img
+                  FROM `items` i
+                  JOIN `category` c
+                    ON i.cat_id = c.cat_id 
+                WHERE c.cat_id = ?;";
+        
+        $stmt=mysqli_stmt_init($conn);
+        if (!mysqli_stmt_prepare($stmt, $sql)){
+           return false;
+           exit();
+         }
+        mysqli_stmt_bind_param($stmt, "s" , $cat);
+      }
+  }
+  else{ //check if searchkey variable is not NULL
+        $sql = "SELECT i.item_id
+                     , i.item_name
+                     , i.item_short_code
+                     , c.cat_desc
+                     , i.item_price
+                     , i.item_img
+                  FROM `items` i
+                  JOIN `category` c
+                    ON i.cat_id = c.cat_id
+                 WHERE i.item_name LIKE ?
+                    OR i.item_short_code = ?
+                    OR c.cat_desc like ?
+                    OR i.item_price = ?;";
+        $stmt=mysqli_stmt_init($conn);
+         if (!mysqli_stmt_prepare($stmt, $sql)){
+            echo "Something went wrong.";
+            exit();
+         }
+        $itemname="%{$searchkey}%"; 
+        mysqli_stmt_bind_param($stmt, "ssss" , $itemname, $searchkey, $itemname, $searchkey);
+        
+    }
+         mysqli_stmt_execute($stmt);
+         $resultData = mysqli_stmt_get_result($stmt);
+    if(!empty($resultData)){
+         $arr=array();
+         while($row = mysqli_fetch_assoc($resultData)){
+             array_push($arr,$row);
+         }
+         return $arr;
+    }else{
+        return false;
+    }
+}
+
 function displayItemInfo($conn, $value = "", $category = array()){
     if(sizeof($category) > 0){
         $catStr = "0";
@@ -267,7 +344,7 @@ function userNameExists($conn, $username){
 }
 
 function getCartCount($conn,$user){
-    $sql_cart_count = "SELECT COUNT(*) cartcount FROM `cart` WHERE status = 'P' AND user_id = ?;";
+    $sql_cart_count = "SELECT count(distinct item_id) cartcount FROM `cart` WHERE status = 'P' AND user_id = ?;";
     $stmt=mysqli_stmt_init($conn);
 
 if (!mysqli_stmt_prepare($stmt, $sql_cart_count)){

@@ -14,6 +14,13 @@
          <div class="card">
             <div class="card-header">
              <h3 class="card-title text-secondary">Login</h3>   
+             <?php
+                if(isset($_GET['signup'])){ ?>
+                    <div class="alert alert-success">
+                        <p class=""> <i class="bi bi-check"></i> Registration Complete.You may now login.</p>
+                    </div>
+                <?php }
+                ?>
             </div>
             <form action="includes/processlogin.php" method="post">     
                <div class="card-body">

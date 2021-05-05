@@ -181,7 +181,7 @@ if(userNameExists($conn, $p_username) !== false){
             else
             { 
                 if(createCustomer($conn,$cust_ref_number,$p_username, $p_password, $email,$firstname,$lastname,$midname,$address1,$brgy,$cityMun,$province,$zipcode, $gender)!== false){
-                    header("location: ../index.php?success=signup");
+                    header("location: ../index.php?signup=1");
                 }
                 else{ ?>
                     <div class="alert alert-danger"><?php echo "Somethng Went Wrong";?></div>
