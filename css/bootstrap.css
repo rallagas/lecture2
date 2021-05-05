@@ -52,6 +52,7 @@ body {
   line-height: 1.5;
   color: #212529;
   background-color: #fff;
+  background-image: url('../images/bg-theme-2.jpg');
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }

@@ -12,9 +12,17 @@ if (isset($_GET['searchkey'])){
     <meta charset="UTF-8">
     <title>Lecture : SQL Integration with PHP</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/custom.css">
     <link rel="stylesheet" href="../font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../css/custom.css">
+    <style>
+    body{
+    background-image: url('../images/bg-theme-2.jpg');
+    background-repeat: no-repeat;
+     background-attachment: fixed;
+}
+    </style>
 </head>
+
 <body>
        
 <div class="container-fluid">
@@ -272,6 +280,12 @@ if(!isset($searchkey)){
 </div>
 </div>
 </div>     
+<div class="footer">
+    <p class="text-end fw-light text-reset fixed-bottom float-end me-1">
+        All Rights Reserved 2021 &copy; rallagas
+        
+    </p>
+</div>
 </body>
 <?php mysqli_close($conn);?>
 <script src="../js/bootstrap.min.js"></script>
