@@ -28,7 +28,7 @@ if (isset($_GET['searchkey'])){
 <div class="container-fluid">
     <div class="row pt-5" id="NavigationPanel">
         <!-- Navigation Bar -->
-        <nav class="navbar navbar-expand-lg bg-light text-white shadow fixed-top">
+        <nav class="navbar bg-light navbar-expand-lg text-white shadow fixed-top">
             <div class="container-fluid">
              <a href="index.php" class="navbar-brand btn btn-no-border-orange pb-3"> 
                 <i class="bi bi-house"></i> 
