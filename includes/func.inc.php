@@ -120,6 +120,44 @@ function displayItemInfo($conn, $value = "", $category = array()){
         mysqli_stmt_close($stmt); 
 }
 
+function getCartList($conn, $userid){
+    $sql_cart_list = "SELECT i.item_id
+                           , i.item_name
+                           , i.item_img
+                           , i.item_price
+                           , sum(c.item_qty) total_item_qty
+                           , sum(c.item_qty * i.item_price)  total_order_amt
+                        FROM cart c
+                        JOIN items i
+                          ON c.item_id = i.item_id
+                       WHERE c.user_id = ? 
+                          AND c.status = 'P'
+                          group by i.item_name
+                           , i.item_img
+                           , i.item_price; ";
+                      $stmt=mysqli_stmt_init($conn);
+    
+                    if (!mysqli_stmt_prepare($stmt, $sql_cart_list)){
+                        return false;
+                        exit();
+                    }
+                        mysqli_stmt_bind_param($stmt, "s" ,$userid);
+                        mysqli_stmt_execute($stmt);
+
+                        $resultData = mysqli_stmt_get_result($stmt);
+    if(!empty($resultData)){
+        $arr = array();
+        while($row = mysqli_fetch_assoc($resultData)){
+            array_push($arr,$row);
+        }
+        return $arr;
+    }
+    else{
+        return false;
+    }
+    
+}
+
 
 function fullDisplay($conn){
     $sql = "SELECT i.item_id item_id
@@ -309,6 +347,24 @@ function createUser($conn,$username,$password, $email,$usertype){
         return true;
     
 }
+function deleteCartItem($conn,$itemid,$userid){
+    $err;
+    $sql="DELETE FROM `cart` 
+           WHERE user_id = ?
+             and item_id = ?
+             and status = 'P'";
+
+    $stmt=mysqli_stmt_init($conn);
+     if (!mysqli_stmt_prepare($stmt, $sql)){
+        return false;
+        exit();
+     }
+        mysqli_stmt_bind_param($stmt, "ss" ,$userid,$itemid);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return true;
+    
+}
 
 
 function get_random_figures($str){
@@ -343,6 +399,56 @@ function userNameExists($conn, $username){
         mysql_stmt_close($stmt);
 }
 
+function getUserFullName($conn,$user){
+    $sql = "SELECT concat(c.cust_lname, ', ' , c.cust_fname, ' (@',u.username,')' ) as userinfo
+              FROM `customer` c
+              JOIN `users` u
+                on (c.cust_ref_number = u.cust_ref_number)
+            WHERE c.cust_ref_number = ?;
+             ";
+    $stmt=mysqli_stmt_init($conn);
+
+if (!mysqli_stmt_prepare($stmt, $sql)){
+    return false;
+    exit();
+}
+    mysqli_stmt_bind_param($stmt, "s" ,$user);
+    mysqli_stmt_execute($stmt);
+
+    $resultData = mysqli_stmt_get_result($stmt);
+    if(!empty($resultData)){
+        if($row = mysqli_fetch_assoc($resultData)){
+          return $row['userinfo'];
+        }
+    }else{
+        return false;
+    }
+mysql_stmt_close($stmt);
+}
+function getUserInfo($conn,$user){
+    $sql = "SELECT c.*
+              FROM `customer` c
+            WHERE cust_ref_num = ?;
+             ";
+    $stmt=mysqli_stmt_init($conn);
+
+if (!mysqli_stmt_prepare($stmt, $sql)){
+    return false;
+    exit();
+}
+    mysqli_stmt_bind_param($stmt, "s" ,$user);
+    mysqli_stmt_execute($stmt);
+
+    $resultData = mysqli_stmt_get_result($stmt);
+    if(!empty($resultData)){
+        if($row = mysqli_fetch_assoc($resultData)){
+          return $row;
+        }
+    }else{
+        return false;
+    }
+mysql_stmt_close($stmt);
+}
 function getCartCount($conn,$user){
     $sql_cart_count = "SELECT count(distinct item_id) cartcount FROM `cart` WHERE status = 'P' AND user_id = ?;";
     $stmt=mysqli_stmt_init($conn);
