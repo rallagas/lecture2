@@ -13,6 +13,9 @@ $user_info = uidExists( $conn, $p_un , $p_pw );
         if($_SESSION['user_type'] == 'C'){
             header("location: ../customer/");
         }
+        else if($_SESSION['user_type'] == 'A'){
+            header("location: ../admin/");
+        }
     }
     else{
           header("location: ../?error=userpasswordcombinationNotFound");

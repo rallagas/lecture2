@@ -3,6 +3,34 @@ function cleanstr($str){
     return htmlentities($str);
 }
 
+function checkImage($img_file, $targetdir, $targetimagename){
+ $stat = array(
+ 'fileSizeOk' => '',
+ 'fileExists' => '',
+ 'fileType' => ''
+ );
+    
+    
+    $tmp_filename = $img_file['tmp_name'];
+    $file_size = $img_file['size'];
+    $img_size = getimagesize($img_file['tmp_name']);
+    $img_mime = $img_size['mime'];
+    $acceptable_files = array('image/jpeg','image/png','image/jpg');
+    
+    if(! in_array($img_mime, $acceptable_files)){
+        $stat['fileType'] = "This file is not an Image .[jpg / png] only";
+    }
+    if($img_size === false || $file_size > 500000){
+        $stat['fileSizeOk'] = "image size is not acceptable";
+    }
+    if(file_exists($targetdir."/".$targetimagename)){
+        $stat['fileExists'] = "File Exists. Change the Item Name";
+    }
+    
+    return $stat;
+    
+}
+
 function setisEmpty(){
    $bool_empty = false;
    $args = func_get_args();
@@ -400,11 +428,13 @@ function userNameExists($conn, $username){
 }
 
 function getUserFullName($conn,$user){
-    $sql = "SELECT concat(c.cust_lname, ', ' , c.cust_fname, ' (@',u.username,')' ) as userinfo
-              FROM `customer` c
-              JOIN `users` u
-                on (c.cust_ref_number = u.cust_ref_number)
-            WHERE c.cust_ref_number = ?;
+    $sql = "SELECT CASE WHEN u.usertype = 'C' then concat(c.cust_lname, ', ' , c.cust_fname, ' (@',u.username,')' )
+                        WHEN u.usertype = 'A' then concat('Hello Admin, @',u.username, ' - ',u.emailadd) 
+                   ELSE 'User Unrecognized' END as userinfo
+              FROM `users` u
+        LEFT OUTER JOIN `customer` c
+                ON (c.cust_ref_number = u.cust_ref_number)
+             WHERE u.cust_ref_number = ? ;
              ";
     $stmt=mysqli_stmt_init($conn);
 
@@ -555,6 +585,8 @@ function getCategories($conn){
       }
         mysql_stmt_close($stmt);
 }
+
+
 function getCartSummary($conn, $user_id){
     $sql_cart_list = "SELECT c.user_id
                            , sum(i.item_price * c.item_qty) total_price
@@ -581,4 +613,3 @@ function getCartSummary($conn, $user_id){
         return $arr;               //this is the return value
         mysqli_stmt_close($stmt);  //close the mysqli_statement
 }
-
