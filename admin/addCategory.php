@@ -1,11 +1,7 @@
 <?php
-if(isset($_POST['additem'])){
+if(isset($_POST['addCategory'])){
 include_once "../includes/db_conn.php";
 include_once "../includes/func.inc.php";
-    
-    $itemname = htmlentities($_POST['itemname']);
-    $itemsc   = htmlentities($_POST['itemshortcode']);
-    $itemPrice= htmlentities($_POST['itemprice']);
     $itemcat  = htmlentities($_POST['itemcategory']);
     $itemstat = htmlentities($_POST['itemstatus']);
     
@@ -16,19 +12,16 @@ include_once "../includes/func.inc.php";
     $baseitem_img = basename($_FILES["itemimagefile"]["name"]);
     $ext = strtolower(pathinfo($baseitem_img,PATHINFO_EXTENSION));
     $target_dir = '../images';
-    $target_filename = strtolower($itemname). "." .$ext; 
+    $target_filename = strtolower($itemname).".".$ext; 
     
   
   $check = getimagesize($image_temp_file);
-    
-
   $filecheckstat = $check !== false ? true : false;
+  echo "<br>";
     
-   $file_stat = checkImage($_FILES["itemimagefile"], $target_dir, $target_filename);
+  $file_stat = checkImage($_FILES["itemimagefile"], $target_dir, $target_filename);
     $file_err_count=0;
-    
     $error_msg = null;
-    
     foreach($file_stat as $key => $stat){
         if($stat != ''){
             $error_msg .= ($file_err_count+1). ": ". $stat ."<br>";
@@ -74,7 +67,7 @@ include_once "../includes/func.inc.php";
                 
         if(!$file_err_count){
              //upload file.
-            if (move_uploaded_file($image_temp_file, $target_dir."/".$target_filename) ) {
+            if (move_uploaded_file($image_temp_file, $target_dir."/".$target_filename)) {
                 echo "The file ". htmlspecialchars( basename( $_FILES["fileToUpload"]["name"])). " has been uploaded.";
               } else {
                 header("location: index.php?error=99"); //file upload failed
