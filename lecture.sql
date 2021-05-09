@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 06, 2021 at 12:18 AM
+-- Generation Time: May 09, 2021 at 04:52 AM
 -- Server version: 10.4.17-MariaDB
 -- PHP Version: 8.0.1
 
@@ -29,28 +29,29 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `cart` (
   `cart_id` int(11) NOT NULL,
+  `order_ref_num` varchar(64) NOT NULL,
+  `total_amt_to_pay` double NOT NULL,
   `item_id` int(11) NOT NULL,
   `user_id` varchar(128) NOT NULL,
   `item_qty` int(11) NOT NULL,
-  `status` varchar(1) NOT NULL DEFAULT 'P' COMMENT 'P = Pending\r\nC = Checked Out\r\nX = Paid'
+  `status` varchar(1) NOT NULL DEFAULT 'P' COMMENT 'P = Pending\r\nC = Checked Out\r\nX = Paid',
+  `confirm` varchar(1) NOT NULL DEFAULT 'Y',
+  `date_ordered` date NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `cart`
 --
 
-INSERT INTO `cart` (`cart_id`, `item_id`, `user_id`, `item_qty`, `status`) VALUES
-(13, 1, '1619349150854685265796d61724c6c6167617341', 100, 'P'),
-(14, 2, '1619349150854685265796d61724c6c6167617341', 200, 'P'),
-(15, 3, '1619349150854685265796d61724c6c6167617341', 2, 'P'),
-(16, 1, '1619349150854685265796d61724c6c6167617341', 1000, 'P'),
-(17, 1, '1619349150854685265796d61724c6c6167617341', 1000000, 'P'),
-(18, 1, '1619349150854685265796d61724c6c6167617341', 2, 'P'),
-(19, 1, '1619349150854685265796d61724c6c6167617341', 100000, 'P'),
-(20, 1, '162003461459607746573747465737474657374', 10000, 'P'),
-(35, 45, '1620236629117195265796d61724c6c6167617341', 1, 'P'),
-(37, 34, '1620236629117195265796d61724c6c6167617341', 1, 'P'),
-(39, 35, '1620236629117195265796d61724c6c6167617341', 1, 'P');
+INSERT INTO `cart` (`cart_id`, `order_ref_num`, `total_amt_to_pay`, `item_id`, `user_id`, `item_qty`, `status`, `confirm`, `date_ordered`) VALUES
+(130, 'GXAEINQUVS33', 214.2, 1, '1619349150854685265796d61724c6c6167617341', 20, 'C', 'Y', '2021-05-09'),
+(131, 'GXAEINQUVS33', 214.2, 1, '1619349150854685265796d61724c6c6167617341', 20, 'C', 'Y', '2021-05-09'),
+(132, 'GXAEINQUVS33', 214.2, 1, '1619349150854685265796d61724c6c6167617341', 20, 'C', 'Y', '2021-05-09'),
+(133, 'GXAEINQUVS33', 214.2, 1, '1619349150854685265796d61724c6c6167617341', 20, 'C', 'Y', '2021-05-09'),
+(134, 'BTGR34547253', 266.4, 1, '1619349150854685265796d61724c6c6167617341', 20, 'C', 'Y', '2021-05-09'),
+(135, 'BTGR34547253', 266.4, 2, '1619349150854685265796d61724c6c6167617341', 20, 'C', 'Y', '2021-05-09'),
+(136, 'BTGR34547253', 266.4, 3, '1619349150854685265796d61724c6c6167617341', 20, 'C', 'Y', '2021-05-09'),
+(137, 'BTGR34547253', 266.4, 48, '1619349150854685265796d61724c6c6167617341', 20, 'C', 'Y', '2021-05-09');
 
 -- --------------------------------------------------------
 
@@ -79,6 +80,35 @@ INSERT INTO `category` (`cat_id`, `cat_desc`, `cat_icon`, `cat_status`) VALUES
 (7, 'Pizzas', 'c_Pizzas.jpg', 'A'),
 (8, 'Buns', 'c_Buns.jpg', 'A'),
 (9, 'Spreads', 'c_Spreads.jpg', 'A');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `checkout_standard_fees_cfg`
+--
+
+CREATE TABLE `checkout_standard_fees_cfg` (
+  `id` int(11) NOT NULL,
+  `shipping_fee` double NOT NULL,
+  `delivery_mode` varchar(50) NOT NULL DEFAULT 'COD',
+  `tax` varchar(1) NOT NULL DEFAULT 'W' COMMENT 'W = waived Y=Yes',
+  `min_promo_purchase` int(11) NOT NULL,
+  `promo_shipping_fee` double NOT NULL,
+  `global_promotion_perc` double NOT NULL,
+  `min_purchase_amt` double NOT NULL,
+  `max_discount_amt` double NOT NULL,
+  `start_date_eff` date NOT NULL,
+  `end_date_eff` date NOT NULL,
+  `status` varchar(1) NOT NULL DEFAULT 'A'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `checkout_standard_fees_cfg`
+--
+
+INSERT INTO `checkout_standard_fees_cfg` (`id`, `shipping_fee`, `delivery_mode`, `tax`, `min_promo_purchase`, `promo_shipping_fee`, `global_promotion_perc`, `min_purchase_amt`, `max_discount_amt`, `start_date_eff`, `end_date_eff`, `status`) VALUES
+(1, 190, 'COD', 'Y', 5, 75, 0.2, 500, 500, '2021-05-01', '2021-05-31', 'A'),
+(2, 250, 'COD', 'W', 0, 75, 0.05, 0, 0, '2021-05-01', '9999-12-31', 'X');
 
 -- --------------------------------------------------------
 
@@ -124,6 +154,7 @@ CREATE TABLE `items` (
   `item_img` varchar(58) NOT NULL,
   `item_short_code` varchar(65) NOT NULL,
   `item_price` double NOT NULL,
+  `minimum_qty` int(11) NOT NULL DEFAULT 1,
   `cat_id` int(11) NOT NULL,
   `item_status` varchar(1) NOT NULL DEFAULT 'A' COMMENT 'A is for active\r\nD is for Discontinued'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -132,51 +163,54 @@ CREATE TABLE `items` (
 -- Dumping data for table `items`
 --
 
-INSERT INTO `items` (`item_id`, `item_name`, `item_img`, `item_short_code`, `item_price`, `cat_id`, `item_status`) VALUES
-(1, 'Pandesal', 'pandesal.jpg', 'P18058', 2, 1, 'A'),
-(2, 'Pan De Coco', 'pandecoco.jpg', 'P17666', 4, 1, 'A'),
-(3, 'Pan Legazpi', 'panlegazpi.jpg', 'P18770', 3, 1, 'A'),
-(4, 'Putok', 'putok.jpg', 'P82569', 4, 8, 'A'),
-(5, 'Reno Liverspread', 'renoliverspread.jpg', 'R91874', 12, 9, 'A'),
-(6, 'CDO Liverspread', 'cdoliverspread.jpg', 'C95912', 12.5, 9, 'A'),
-(7, 'Mongo Bread Roll', 'mongobreadroll.jpg', 'M26336', 4, 2, 'A'),
-(8, 'Ladies Choice Mayo', 'ladieschoicemayo.jpg', 'L96358', 16, 9, 'A'),
-(9, 'Red Bean Bread Roll', 'redbeanbreadroll.jpg', 'R29461', 10, 2, 'A'),
-(10, 'Pizza Bread Roll', 'pizzabreadroll.jpg', 'P21140', 15, 2, 'A'),
-(11, 'Chocolate Bread Roll', 'chocolatebreadroll.jpg', 'C24415', 17.6, 2, 'A'),
-(12, 'Chepati', 'chepati.jpg', 'C35032', 26, 3, 'A'),
-(13, 'Focaccia', 'focaccia.jpg', 'F36207', 32, 3, 'A'),
-(14, 'Frybread', 'frybread.jpg', 'F36748', 41, 3, 'A'),
-(15, 'Lavash', 'lavash.jpg', 'L39334', 26, 3, 'A'),
-(16, 'Pita', 'pita.jpg', 'P38670', 28, 3, 'A'),
-(17, 'Roti', 'roti.jpg', 'R36812', 29, 3, 'A'),
-(18, 'Sesame Bagel', 'sesamebagel.jpg', 'S44607', 41, 4, 'A'),
-(19, 'Garlic Bagel', 'garlicbagel.jpg', 'G49051', 40, 4, 'A'),
-(20, 'Asiago Bagel', 'asiagobagel.jpg', 'A44176', 43, 4, 'A'),
-(21, 'Whole Wheat Bagel', 'wholewheatbagel.jpg', 'W48381', 31, 4, 'A'),
-(22, 'Pumpernickel Bagel', 'pumpernickelbagel.jpg', 'P49908', 27, 4, 'A'),
-(23, 'Cinnamon Bagel', 'cinnamonbagel.jpg', 'C44091', 30, 4, 'A'),
-(24, 'Choco Doughnut', 'chocodoughnut.jpg', 'C56295', 28, 5, 'A'),
-(25, 'Frosted Doughnut', 'frosteddoughnut.jpg', 'F56477', 39, 5, 'A'),
-(26, 'Strawbery Doughnut', 'strawberrydoughnut.jpg', 'S58033', 30, 5, 'A'),
-(27, 'Glazed Doughnut', 'glazeddoughnut.jpg', 'G55546', 38, 5, 'A'),
-(28, 'Blueberry Doughnut', 'blueberrydoughnut.jpg', 'B56796', 28, 5, 'A'),
-(29, 'Blueberry muffin', 'blueberrymuffin.jpg', 'B65971', 37, 6, 'A'),
-(30, 'Apple-Cinnamon muffin', 'apple-cinnamonmuffin.jpg', 'A68727', 41, 6, 'A'),
-(31, 'Chocolate Chip Muffins', 'chocolatechipmuffins.jpg', 'C66390', 31, 6, 'A'),
-(32, 'Honey Muffins', 'honeymuffins.jpg', 'H67561', 39, 6, 'A'),
-(33, 'Hawaiian Pizza', 'hawaiianpizza.jpg', 'H78979', 100, 7, 'A'),
-(34, 'Overload Pizza', 'overloadpizza.jpg', 'O71558', 160, 7, 'A'),
-(35, 'Tomato Pizza', 'tomatopizza.jpg', 'T75114', 120, 7, 'A'),
-(36, 'Pepperoni Pizza', 'pepperonipizza.jpg', 'P75528', 120, 7, 'A'),
-(37, 'BBQ Chicken', 'bbqchicken.jpg', 'B73902', 120, 7, 'A'),
-(38, 'Buffalo Pizza', 'buffalopizza.jpg', 'B71726', 150, 7, 'A'),
-(39, 'Plain Bun', 'plainbun.jpg', 'P84835', 15, 8, 'A'),
-(40, 'Seasame Bun', 'seasamebun.jpg', 'S86811', 20, 8, 'A'),
-(41, 'Long Bun', 'longbun.jpg', 'L89931', 40, 8, 'A'),
-(42, 'Sandwich Bun', 'sandwichbun.jpg', 'S87504', 25, 8, 'A'),
-(44, 'Hawaiian Pizza overload', 'hawaiianpizzaoverload.jpg', 'HP112212', 150, 7, 'A'),
-(45, 'Peperoni overload', 'peperonioverload.jpg', 'PO123456', 150, 7, 'A');
+INSERT INTO `items` (`item_id`, `item_name`, `item_img`, `item_short_code`, `item_price`, `minimum_qty`, `cat_id`, `item_status`) VALUES
+(1, 'Pandesal', 'pandesal.jpg', 'P18058', 2, 20, 1, 'A'),
+(2, 'Pan De Coco', 'pandecoco.jpg', 'P17666', 4, 20, 1, 'A'),
+(3, 'Pan Legazpi', 'panlegazpi.jpg', 'P18770', 3, 20, 1, 'A'),
+(4, 'Putok', 'putok.jpg', 'P82569', 4, 10, 8, 'A'),
+(5, 'Reno Liverspread', 'renoliverspread.jpg', 'R91874', 12, 10, 9, 'A'),
+(6, 'CDO Liverspread', 'cdoliverspread.jpg', 'C95912', 12.5, 10, 9, 'A'),
+(7, 'Mongo Bread Roll', 'mongobreadroll.jpg', 'M26336', 4, 10, 2, 'A'),
+(8, 'Ladies Choice Mayo', 'ladieschoicemayo.jpg', 'L96358', 16, 10, 9, 'A'),
+(9, 'Red Bean Bread Roll', 'redbeanbreadroll.jpg', 'R29461', 10, 10, 2, 'A'),
+(10, 'Pizza Bread Roll', 'pizzabreadroll.jpg', 'P21140', 15, 10, 2, 'A'),
+(11, 'Chocolate Bread Roll', 'chocolatebreadroll.jpg', 'C24415', 17.6, 10, 2, 'A'),
+(12, 'Chepati', 'chepati.jpg', 'C35032', 26, 5, 3, 'A'),
+(13, 'Focaccia', 'focaccia.jpg', 'F36207', 32, 5, 3, 'A'),
+(14, 'Frybread', 'frybread.jpg', 'F36748', 41, 1, 3, 'A'),
+(15, 'Lavash', 'lavash.jpg', 'L39334', 26, 5, 3, 'A'),
+(16, 'Pita', 'pita.jpg', 'P38670', 28, 5, 3, 'A'),
+(17, 'Roti', 'roti.jpg', 'R36812', 29, 5, 3, 'A'),
+(18, 'Sesame Bagel', 'sesamebagel.jpg', 'S44607', 41, 1, 4, 'A'),
+(19, 'Garlic Bagel', 'garlicbagel.jpg', 'G49051', 40, 5, 4, 'A'),
+(20, 'Asiago Bagel', 'asiagobagel.jpg', 'A44176', 43, 1, 4, 'A'),
+(21, 'Whole Wheat Bagel', 'wholewheatbagel.jpg', 'W48381', 31, 5, 4, 'A'),
+(22, 'Pumpernickel Bagel', 'pumpernickelbagel.jpg', 'P49908', 27, 5, 4, 'A'),
+(23, 'Cinnamon Bagel', 'cinnamonbagel.jpg', 'C44091', 30, 5, 4, 'A'),
+(24, 'Choco Doughnut', 'chocodoughnut.jpg', 'C56295', 28, 5, 5, 'A'),
+(25, 'Frosted Doughnut', 'frosteddoughnut.jpg', 'F56477', 39, 5, 5, 'A'),
+(26, 'Strawbery Doughnut', 'strawberrydoughnut.jpg', 'S58033', 30, 5, 5, 'A'),
+(27, 'Glazed Doughnut', 'glazeddoughnut.jpg', 'G55546', 38, 5, 5, 'A'),
+(28, 'Blueberry Doughnut', 'blueberrydoughnut.jpg', 'B56796', 28, 5, 5, 'A'),
+(29, 'Blueberry muffin', 'blueberrymuffin.jpg', 'B65971', 37, 5, 6, 'A'),
+(30, 'Apple-Cinnamon muffin', 'apple-cinnamonmuffin.jpg', 'A68727', 41, 1, 6, 'A'),
+(31, 'Chocolate Chip Muffins', 'chocolatechipmuffins.jpg', 'C66390', 31, 5, 6, 'A'),
+(32, 'Honey Muffins', 'honeymuffins.jpg', 'H67561', 39, 5, 6, 'A'),
+(33, 'Hawaiian Pizza', 'hawaiianpizza.jpg', 'H78979', 100, 1, 7, 'A'),
+(34, 'Overload Pizza', 'overloadpizza.jpg', 'O71558', 160, 1, 7, 'A'),
+(35, 'Tomato Pizza', 'tomatopizza.jpg', 'T75114', 120, 1, 7, 'A'),
+(36, 'Pepperoni Pizza', 'pepperonipizza.jpg', 'P75528', 120, 1, 7, 'A'),
+(37, 'BBQ Chicken', 'bbqchicken.jpg', 'B73902', 120, 1, 7, 'A'),
+(38, 'Buffalo Pizza', 'buffalopizza.jpg', 'B71726', 150, 1, 7, 'A'),
+(39, 'Plain Bun', 'plainbun.jpg', 'P84835', 15, 10, 8, 'A'),
+(40, 'Seasame Bun', 'seasamebun.jpg', 'S86811', 20, 5, 8, 'A'),
+(41, 'Long Bun', 'longbun.jpg', 'L89931', 40, 5, 8, 'A'),
+(42, 'Sandwich Bun', 'sandwichbun.jpg', 'S87504', 25, 5, 8, 'A'),
+(44, 'Hawaiian Pizza overload', 'hawaiianpizzaoverload.jpg', 'HP112212', 150, 1, 7, 'A'),
+(45, 'Peperoni overload', 'peperonioverload.jpg', 'PO123456', 150, 1, 7, 'A'),
+(48, 'Pandemongo', 'pandemongo.jpg', 'PM10101010', 2, 20, 1, 'A'),
+(49, 'Coffee Slice', 'coffee slice.jpg', 'CF0909092', 120, 20, 1, 'A'),
+(50, 'Ensaymada', 'ensaymada.jpg', 'E908203982', 5, 20, 1, 'A');
 
 -- --------------------------------------------------------
 
@@ -571,20 +605,13 @@ INSERT INTO `lu_day` (`day_id`, `date`, `year_id`, `qtr_id`, `period_id`, `holid
 
 CREATE TABLE `orders` (
   `order_id` int(9) NOT NULL,
+  `order_number` varchar(24) NOT NULL,
   `cust_id` int(11) NOT NULL,
-  `item_id` int(11) NOT NULL,
   `order_qty` int(11) NOT NULL,
   `net_amt` float NOT NULL DEFAULT 0,
   `order_status` varchar(1) NOT NULL DEFAULT 'P' COMMENT 'P is for Pending\r\nC is for Confirmed\r\nD is for Delivered\r\nP is for Paid',
   `date_ordered` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`order_id`, `cust_id`, `item_id`, `order_qty`, `net_amt`, `order_status`, `date_ordered`) VALUES
-(1, 1, 1, 100, 0, 'P', 0);
 
 -- --------------------------------------------------------
 
@@ -44553,6 +44580,12 @@ ALTER TABLE `category`
   ADD PRIMARY KEY (`cat_id`);
 
 --
+-- Indexes for table `checkout_standard_fees_cfg`
+--
+ALTER TABLE `checkout_standard_fees_cfg`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `customer`
 --
 ALTER TABLE `customer`
@@ -44614,13 +44647,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=138;
 
 --
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
   MODIFY `cat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `checkout_standard_fees_cfg`
+--
+ALTER TABLE `checkout_standard_fees_cfg`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `customer`
@@ -44632,7 +44671,7 @@ ALTER TABLE `customer`
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `item_id` int(9) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `item_id` int(9) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `orders`
