@@ -1,3 +1,5 @@
-body{
-    background-image: url('../images/bg-theme-2.jpg');
-}
+ body {
+     background-image: url('../images/bg-theme-2.jpg');
+     background-repeat: no-repeat;
+     background-attachment: fixed;
+ }
