@@ -49,7 +49,7 @@ if (isset($_GET['searchkey'])){
                             </li>
                             <li class="nav-item">
                                 <!--Navigation button to show the form to add item button-->
-                                <a class="nav-link btn btn-no-border-orange" href="SalesDashboard.php">
+                                <a class="nav-link btn btn-no-border-orange" data-bs-toggle="collapse" href="#addCategoryForm" role="button" aria-expanded="false" aria-controls="SalesDashboard">
                                     Sales Dashboard <i class="bi bi-graph-up"></i>
                                 </a>
                             </li>
@@ -80,7 +80,6 @@ if (isset($_GET['searchkey'])){
             </nav>
             <!--end Navigation Bar -->
         </div>
-
         <div class="row mx-3" id="formsPanel">
 
             <div class="col-lg-4 col-sm-12 col-md-12">
@@ -205,17 +204,7 @@ if(!isset($searchkey)){
             <marker id="cat<?php echo $cat['cat_id']; ?>" class=' mt-5 mb-5'></marker>
 
             <div class="col-lg-3 col-sm-12 mb-0">
-                <form action="../includes/updatecategory.php" method="post">
-
-                    <div class="input-group mt-5">
-                        <a href="?deletecategory=<?php echo $cat['cat_id']; ?>" class="btn btn-outline-danger"> <i class="bi bi-trash"></i> </a>
-                        <div class="form-floating">
-                            <input type="text" class="form-control" name="catName" id="cat<?php echo $cat['cat_id']; ?>" value="<?php echo $cat['cat_desc']; ?>">
-                            <label for="cat<?php echo $cat['cat_id']; ?>" class="form-label">Category Name</label>
-                        </div>
-                        <button class="btn btn-outline-success"> <i class="bi bi-arrow-counterclockwise"></i> </button>
-                    </div>
-                </form>
+                <h3 class="display-6"><?php echo $cat['cat_desc']; ?></h3>
             </div>
 
             <div class="col-lg-4 col-sm-12 mt-0">
@@ -254,63 +243,7 @@ if(!isset($searchkey)){
              $menu = showMenu($conn, $cat['cat_id']);
              if(!empty($menu) || $menu !== false ){
                 foreach($menu as $key => $val){ ?>
-            <div class="col-lg-2 col-md-6 col-sm-6">
 
-                <div class="card border border-white">
-                    <img src="../images/<?php echo $val['item_img'] == '' ? "200x200.png" : $val['item_img']; ?>" alt="1 x 1" class="card-img-top" style=" height: 220px; width=150px; object-fit: cover">
-                    <div class="card-body">
-
-                        <form action="../includes/deleteitem.php" method="post">
-                            <input class="form-control mb-1" type="hidden" name="item_id" id="item_id" value="<?php echo $val['item_id']; ?>">
-                            <div class="form-floating">
-                                <input id="itemname<?php echo $val['item_id']; ?>" class="form-control" type="text" name="item_id" value="<?php echo $val['item_name']; ?>">
-                                <label class="form-label" for="itemname<?php echo $val['item_id']; ?>">Item Name</label>
-                            </div>
-                            <div class="form-floating">
-                                <input id="itemprice<?php echo $val['item_id']; ?>" class="form-control mb-1" type="number" name="item_price" value="<?php echo $val['item_price']; ?>">
-                                <label class="form-label" for="itemprice<?php echo $val['item_id']; ?>">Item Price</label>
-                            </div>
-                            <div class="form-floating">
-                                <input id="itemsc<?php echo $val['item_id']; ?>" class="form-control mb-1" type="text" name="item_short_code" value="<?php echo $val['item_short_code']; ?>">
-                                <label class="form-label" for="itemsc<?php echo $val['item_id']; ?>">Item Short Code</label>
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-outline-success" title="Update <?php echo $val['item_name']; ?>"> <i class="bi bi-arrow-counterclockwise"></i> </button>
-                            <a href="?archiveitem=<?php echo $val['item_id']; ?>" class="btn btn-sm btn-outline-danger" title="Archive <?php echo $val['item_name']; ?>"> <i class="bi bi-x"></i> </a>
-                        </form>
-
-
-                    </div>
-                    <div class="card-footer">
-                        <table class="table table-hover table-sm table-responsive fs-7">
-                            <thead>
-                                <th class="display-7">Date</th>
-                                <th>Net Sales</th>
-                                <th>Total Item Ordered</th>
-                            </thead>
-                            <?php
-                //sales perf                          
-               $item_sales = getSalesPerfItem($conn, $val['item_id']); 
-               if(!count($item_sales)){ ?>
-                            <tr class="table-danger">
-                                <td colspan="3">No Data Found</td>
-                            </tr>
-                            <?php }
-               else{
-                foreach($item_sales as $sales => $prop){ ?>
-                            <tr class="table-success">
-                                <td><?php echo $prop['date_ordered'];?> </td>
-                                <td><?php echo nf2($prop['total_net_sale']);?> </td>
-                                <td><?php echo $prop['total_item_ordered'];?> </td>
-
-                            </tr>
-                            <?php    }
-               }
-                    ?>
-                        </table>
-
-                    </div>
-                </div>
-            </div>
 
             <?php }
              }
@@ -363,7 +296,6 @@ if(!isset($searchkey)){
         </div>
         <?php } ?>
 
-    </div>
     </div>
 
 </body>
