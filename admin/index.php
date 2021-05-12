@@ -3,6 +3,7 @@ session_start();
 
 include_once "../includes/db_conn.php";
 include_once "../includes/func.inc.php";
+include_once "../includes/utilities.inc.php";
 $searchkey=NULL;
 if (isset($_GET['searchkey'])){
     $searchkey=htmlentities($_GET['searchkey']);  
@@ -15,6 +16,8 @@ if (isset($_GET['searchkey'])){
     <title>Lecture : SQL Integration with PHP</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="../font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="../css/custom.css">
 </head>
 
 <body>
@@ -160,18 +163,14 @@ if (isset($_GET['searchkey'])){
                 <div id="addCategory" class="card collapse mt-5 shadow">
                     <div class="card-header">
                         <br>
-                        <h3 class="display-6">Add New Category</h3>
+                        <h3 class="display-6">New Category</h3>
 
                     </div>
                     <form action="addCategory.php" method="POST" enctype="multipart/form-data">
                         <div class="card-body">
                             <div class="mb-1">
-                                <label for="i_ItemName" class="form-label">Item Name</label>
-                                <input name="itemname" id="i_ItemName" type="text" class="form-control">
-                            </div>
-                            <div class="mb-1">
-                                <label for="" class="form-label">Item Short Code</label>
-                                <input name="itemshortcode" type="text" class="form-control">
+                                <label for="i_ItemName" class="form-label">Category Name</label>
+                                <input name="itemname" id="c_Catname" type="text" class="form-control">
                             </div>
                             <div class="mb-1">
                                 <label for="" class="form-label">Image</label>
@@ -205,25 +204,50 @@ if(!isset($searchkey)){
         <div class="row mt-3 p-3 rounded-2 border border-bottom-0 border-info">
             <marker id="cat<?php echo $cat['cat_id']; ?>" class=' mt-5 mb-5'></marker>
 
-            <div class="col-lg-3 col-sm-12">
-                <div class="clear-fix">
-                    <!--                    <img src="../images/<?php echo $cat['cat_icon']; ?>" alt="1x1" class="d-inline mx-3 rounded-circle float-start img-fluid" width="50px">-->
-                    <!--                    <h3 class='display-6 d-inline'> <?php echo $cat['cat_desc']; ?></h3>-->
-                    <form action="../includes/updatecategory.php" method="post">
+            <div class="col-lg-3 col-sm-12 mb-0">
+                <form action="../includes/updatecategory.php" method="post">
 
-                        <div class="input-group">
-                            <a href="?deletecategory=<?php echo $cat['cat_id']; ?>" class="btn btn-outline-danger"> <i class="bi bi-trash"></i> </a>
-                            <div class="form-floating">
-                                <input type="text" class="form-control" name="catName" id="cat<?php echo $cat['cat_id']; ?>" value="<?php echo $cat['cat_desc']; ?>">
-                                <label for="cat<?php echo $cat['cat_id']; ?>" class="form-label">Category Name</label>
-                            </div>
-                            <button class="btn btn-outline-success"> <i class="bi bi-arrow-counterclockwise"></i> </button>
+                    <div class="input-group mt-5">
+                        <a href="?deletecategory=<?php echo $cat['cat_id']; ?>" class="btn btn-outline-danger"> <i class="bi bi-trash"></i> </a>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="catName" id="cat<?php echo $cat['cat_id']; ?>" value="<?php echo $cat['cat_desc']; ?>">
+                            <label for="cat<?php echo $cat['cat_id']; ?>" class="form-label">Category Name</label>
                         </div>
-                    </form>
-                </div>
+                        <button class="btn btn-outline-success"> <i class="bi bi-arrow-counterclockwise"></i> </button>
+                    </div>
+                </form>
             </div>
 
-            <div class="col-lg-9 col-sm-12">Show Sales Performance here</div>
+            <div class="col-lg-4 col-sm-12 mt-0">
+                <table class="table table-hover table-responsive text-sm">
+                    <thead>
+                        <th>Date</th>
+                        <th>Net Sales</th>
+                        <th>Total Item Ordered</th>
+
+                    </thead>
+                    <?php
+                //sales perf                          
+               $cat_sales = getSalesPerfCat($conn, $cat['cat_id']); 
+               if(!count($cat_sales)){ ?>
+                    <tr>
+                        <td colspan="3">No Data Found</td>
+                    </tr>
+                    <?php }
+               else{
+                foreach($cat_sales as $sales => $prop){ ?>
+                    <tr>
+                        <td><?php echo $prop['date_ordered'];?> </td>
+                        <td><?php echo nf2($prop['total_net_sale']);?> </td>
+                        <td><?php echo $prop['total_item_ordered'];?> </td>
+
+                    </tr>
+                    <?php    }
+               }
+                    ?>
+                </table>
+
+            </div>
         </div>
         <div class="row p-3 rounded-2 border-top-0 border border-info">
             <?php
@@ -254,6 +278,35 @@ if(!isset($searchkey)){
                             <a href="?archiveitem=<?php echo $val['item_id']; ?>" class="btn btn-sm btn-outline-danger" title="Archive <?php echo $val['item_name']; ?>"> <i class="bi bi-x"></i> </a>
                         </form>
 
+
+                    </div>
+                    <div class="card-footer">
+                        <table class="table table-hover table-sm table-responsive fs-7">
+                            <thead>
+                                <th class="display-7">Date</th>
+                                <th>Net Sales</th>
+                                <th>Total Item Ordered</th>
+                            </thead>
+                            <?php
+                //sales perf                          
+               $item_sales = getSalesPerfItem($conn, $val['item_id']); 
+               if(!count($item_sales)){ ?>
+                            <tr class="table-danger">
+                                <td colspan="3">No Data Found</td>
+                            </tr>
+                            <?php }
+               else{
+                foreach($item_sales as $sales => $prop){ ?>
+                            <tr class="table-success">
+                                <td><?php echo $prop['date_ordered'];?> </td>
+                                <td><?php echo nf2($prop['total_net_sale']);?> </td>
+                                <td><?php echo $prop['total_item_ordered'];?> </td>
+
+                            </tr>
+                            <?php    }
+               }
+                    ?>
+                        </table>
 
                     </div>
                 </div>

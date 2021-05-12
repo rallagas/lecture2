@@ -3,3 +3,14 @@
      background-repeat: no-repeat;
      background-attachment: fixed;
  }
+
+ .fs-7 {
+     font-size: 1rem;
+ }
+
+
+ @media (min-width: 1200px) {
+     .display-7 {
+         font-size: 1rem;
+     }
+ }

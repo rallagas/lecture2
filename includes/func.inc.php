@@ -43,9 +43,11 @@ function setisEmpty(){
     return $bool_empty;
 }
 
+
+
 function showMenu($conn, $cat = null, $searchkey = null){
-  if($searchkey == null){
-       if($cat == null) {
+  if($searchkey === null){
+       if($cat === null) {
             //declare the SQL
            $sql = "SELECT i.item_id
                      , i.minimum_qty
@@ -111,19 +113,63 @@ function showMenu($conn, $cat = null, $searchkey = null){
         
     }
          mysqli_stmt_execute($stmt);
-         $resultData = mysqli_stmt_get_result($stmt);
+    
+       $resultData = mysqli_stmt_get_result($stmt);
     if(!empty($resultData)){
-         $arr=array();
-         while($row = mysqli_fetch_assoc($resultData)){
-             array_push($arr,$row);
-         }
-         return $arr;
-    }else{
+        $arr = array();
+        while($row = mysqli_fetch_assoc($resultData)){
+            array_push($arr,$row);
+        }
+        return $arr;
+    }
+    else{
         return false;
     }
+        
 }
 
 
+function getSalesPerfCat($conn, $cat_id){
+    $sql="SELECT c.date_ordered
+               , sum(i.item_price * c.item_qty ) total_net_sale
+               , count(c.item_id) total_item_ordered
+            from `cart` c
+            join `items` i
+              on (c.item_id = i.item_id)
+           WHERE i.cat_id = ?
+             AND c.confirm = 'Y'
+             AND c.status IN ('C','X')
+             GROUP BY c.date_ordered
+             ORDER BY c.date_ordered DESC
+             
+             LIMIT 5;
+    ";
+    $params = array();
+    array_push($params, $cat_id);
+    return query($conn, $sql, $params );
+    
+}
+
+function getSalesPerfItem($conn, $item_id){
+$sql="SELECT c.date_ordered
+, sum(i.item_price * c.item_qty ) total_net_sale
+, count(c.item_id) total_item_ordered
+from `cart` c
+join `items` i
+on (c.item_id = i.item_id)
+WHERE i.item_id = ?
+AND c.confirm = 'Y'
+AND c.status IN ('C','X')
+GROUP BY c.date_ordered
+ORDER BY c.date_ordered DESC
+
+LIMIT 5;
+";
+$params = array();
+array_push($params, $item_id);
+return query($conn, $sql, $params );
+
+}
 
 
 
@@ -608,6 +654,21 @@ WHERE user_id = ?
 and item_id = ?
 and status = 'P'
 and confirm = 'Y'";
+
+$stmt=mysqli_stmt_init($conn);
+if (!mysqli_stmt_prepare($stmt, $sql)){
+return false;
+exit();
+}
+mysqli_stmt_bind_param($stmt, "ss" ,$userid,$itemid);
+mysqli_stmt_execute($stmt);
+mysqli_stmt_close($stmt);
+return true;
+
+}
+function updateCategory($conn,$cat_id,$new_cat_name){
+$err;
+$sql="";
 
 $stmt=mysqli_stmt_init($conn);
 if (!mysqli_stmt_prepare($stmt, $sql)){
