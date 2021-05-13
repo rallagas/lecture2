@@ -6,7 +6,7 @@ $p_un = htmlentities($_POST['p_username']);
 $p_pw = htmlentities($_POST['p_password']);
 $user_info = uidExists( $conn, $p_un , $p_pw );
     if( $user_info !== false) {
-         session_start();
+        session_start();
         $_SESSION['user_type'] = $user_info['usertype'];
         $_SESSION['user_id'] = $user_info['cust_ref_number'];
         echo $_SESSION['user_type'];

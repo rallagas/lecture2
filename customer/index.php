@@ -1,5 +1,14 @@
 <?php
 session_start();
+if(isset($_SESSION['user_type']) && isset($_SESSION['user_id'])){
+    if($_SESSION['user_type'] == 'A'){
+        header("location: ../admin/?error=cannotgothere");
+    }
+}
+else{
+    header("location: ../?error=cannotgothere");
+}
+
 include_once "../includes/db_conn.php";
 include_once "../includes/func.inc.php";
 $page='index';
