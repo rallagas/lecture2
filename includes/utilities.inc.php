@@ -4,19 +4,14 @@
         $err = false;
         $stmt=mysqli_stmt_init($conn);
         if(mysqli_stmt_prepare($stmt, $sql)){
-            $x = 1;
-            $str = 's';
+            $str = NULL;
             $cnt_p = count($params);
+            
             if($cnt_p > 0){
-                
                 foreach($params as $param){
-                    
-                    mysqli_stmt_bind_param($stmt, "{$str}" , $param);
-                    $x++;
-                    if( $cnt_p > 1) { 
-                       $str .= 's';
-                    }
+                    $str .= "s";
                 }
+                 mysqli_stmt_bind_param($stmt, "{$str}" , ...$params );
             }
             
             if(mysqli_stmt_execute($stmt)){

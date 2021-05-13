@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 include_once "../includes/db_conn.php";
 include_once "../includes/func.inc.php";
 include_once "../includes/utilities.inc.php";
@@ -8,6 +7,8 @@ $searchkey=NULL;
 if (isset($_GET['searchkey'])){
     $searchkey=htmlentities($_GET['searchkey']);  
 }
+
+
 ?>
 <html>
 
@@ -15,288 +16,207 @@ if (isset($_GET['searchkey'])){
     <meta charset="UTF-8">
     <title>Lecture : SQL Integration with PHP</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../font/bootstrap-icons.css">
 
-    <link rel="stylesheet" href="../css/custom.css">
 </head>
 
 <body>
+    <header class="navbar navbar-light sticky-top bg-light flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="index.php"> <i class="bi bi-house"></i> Sales Dashboard </a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+        <ul class="navbar-nav px-3">
+            <li class="nav-item text-nowrap">
+                <a class="nav-link" href="#">Sign out</a>
+            </li>
+        </ul>
+    </header>
+
 
     <div class="container-fluid">
-        <div class="row" id="NavigationPanel">
-            <!-- Navigation Bar -->
-            <nav class="navbar fixed-top navbar-expand-lg bg-light text-white shadow-sm">
-                <div class="container-fluid">
-                    <a href="index.php" class="navbar-brand btn btn-no-border-orange pb-3">
-                        <i class="bi bi-house"></i>
+        <div class="row mt-5">
+            <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+
+                <div class="list-group">
+                    <a href="?cat=all&cat_n=All Category" class="list-group-item list-group-item-action">All</a>
+                    <?php $category_list = getCategories($conn);
+                                        if(!empty($category_list)){
+                                            foreach($category_list as $catKey => $cat){ ?>
+                    <a href="?cat=<?php echo $cat['cat_id'];?>&cat_n=<?php echo $cat['cat_desc'];?>" class="list-group-item list-group-item-action">
+                        <?php echo $cat['cat_desc'];?>
                     </a>
-                    <button class="navbar-toggler btn btn-outline-orange" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="bi bi-list"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav me-auto">
-                            <li class="nav-item">
-                                <!--Navigation button to show the form to add item button-->
-                                <a class="nav-link btn btn-no-border-orange" data-bs-toggle="collapse" href="#addItemForm" role="button" aria-expanded="false" aria-controls="addItemForm">
-                                    Add Item <i class="bi bi-plus-circle"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <!--Navigation button to show the form to add item button-->
-                                <a class="nav-link btn btn-no-border-orange" data-bs-toggle="collapse" href="#addCategory" role="button" aria-expanded="false" aria-controls="addCategory">
-                                    New Category <i class="bi bi-plus-circle"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <!--Navigation button to show the form to add item button-->
-                                <a class="nav-link btn btn-no-border-orange" data-bs-toggle="collapse" href="#addCategoryForm" role="button" aria-expanded="false" aria-controls="SalesDashboard">
-                                    Sales Dashboard <i class="bi bi-graph-up"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <!--Navigation button to show the form to add item button-->
-                                <a class="nav-link btn btn-no-border-orange" data-bs-toggle="collapse" href="#addCategoryForm" role="button" aria-expanded="false" aria-controls="SalesDashboard">
-                                    Customers <i class="bi bi-person-lines-fill"></i>
-                                </a>
-                            </li>
-                            <li class="nav-item"></li>
-                        </ul>
-                        <!--Search Bar-->
-                        <a href="../includes/processlogout.php" class="nav-link btn float-end">
-                            <i class="bi bi-power"></i> Logout
-                        </a>
-                        <a href="#userprofile" class="nav-link btn float-end" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="userprofile">
-                            <i class="bi bi-person-circle"></i> <?php echo getUserFullName($conn,$_SESSION['user_id']); ?>
-                        </a>
-                        <form action="index.php" method="GET">
-                            <div class="input-group">
-                                <input id="searchbar" name="searchkey" type="text" class="form-control" placeholder="search">
-                                <button class="btn btn-outline-primary"> Search <i class="bi bi-search"></i> </button>
-                            </div>
-                        </form>
-                        <!--Search Bar-->
-                    </div>
+                    <?php   
+                                           }
+                                            
+                                        }
+                                        else{ ?>
+                    <li class="list-group-item">
+                        No Categories
+                    </li>
+                    <?php }                    
+                    ?>
                 </div>
-            </nav>
-            <!--end Navigation Bar -->
-        </div>
-        <div class="row mx-3" id="formsPanel">
 
-            <div class="col-lg-4 col-sm-12 col-md-12">
-                <?php if(isset($_GET['error'])){
+                <?php
+                if(isset($_GET['f'])){
+                    $it = cleanstr($_GET['f_item']);
+                    $sd = cleanstr($_GET['f_date1']);
+                    $ed = cleanstr($_GET['f_date2']);
+                }else{
+                    $it = NULL;
+                    $sd = NULL;
+                    $ed = NULL;
                     
-                    switch($_GET['error']){
-                        case 1:
-                            if(isset($_GET['itemname'])){
-                               echo "<p class='alert alert-danger'>".$_GET['itemname']." Exists.</p>";
-                            }
-                                break;
-                        case 2: echo "<p class='alert alert-danger'>Adding Record Failed.</p>";
-                                break;
-                        case 3: echo "<p class='alert alert-danger'>Checking Item Failed.</p>";
-                                break;
-                        case 0:
-                            if(isset($_GET['itemname'])){
-                               echo "<p class='alert alert-success'>".$_GET['itemname']." has been added.</p>";
-                            }
-                                break;
-                        default: echo "<div class='alert alert-danger'> <h6 class='display-6'>Oops!</h6><br>".$_GET['error']."</div>";
-                    }
-                  } ?>
-
-                <div id="addItemForm" class="card collapse mt-5 shadow">
-                    <div class="card-header">
-                        <br>
-                        <h3 class="display-6">Add New Item</h3>
-
-                    </div>
-                    <form action="additem.php" method="POST" enctype="multipart/form-data">
-                        <div class="card-body">
-                            <div class="mb-1">
-                                <label for="i_ItemName" class="form-label">Item Name</label>
-                                <input name="itemname" id="i_ItemName" type="text" class="form-control">
-                            </div>
-                            <div class="mb-1">
-                                <label for="" class="form-label">Item Short Code</label>
-                                <input name="itemshortcode" type="text" class="form-control">
-                            </div>
-                            <div class="mb-1">
-                                <label for="" class="form-label">Image</label>
-                                <input name="itemimagefile" type="file" class="form-control">
-                            </div>
-                            <div class="mb-1">
-                                <label for="" class="form-label">Item Price</label>
-                                <input name="itemprice" type="Number" class="form-control">
-                            </div>
-                            <div class="mb-1">
-                                <label for="SelectCategory" class="form-label">Category</label>
-                                <select name="itemcategory" id="" class="form-select">
-                                    <?php
-                      $sql_cat = "SELECT cat_id, cat_desc FROM category WHERE cat_status = 'A';";
-                      $result = mysqli_query($conn, $sql_cat);
-                      if(mysqli_num_rows($result) > 0){
-                          while($row = mysqli_fetch_assoc($result)){
-                              echo "<option value='".$row['cat_id']."'>".$row['cat_desc']."</option>";
-                          }
-                      }
-                    ?>
-                                </select>
-                            </div>
-                            <div class="mb-1">
-                                <label for="" class="form-label">Status</label>
-                                <select name="itemstatus" id="" class="form-select">
-                                    <option value="A">Active</option>
-                                    <option value="D">Discontinued</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-outline-primary" name="additem" type="submit"> <i class="bi bi-save"></i> Save </button>
-                        </div>
-                    </form>
-                </div>
-
-
-            </div>
-            <div class="col-lg-3">
-                <div id="addCategory" class="card collapse mt-5 shadow">
-                    <div class="card-header">
-                        <br>
-                        <h3 class="display-6">New Category</h3>
-
-                    </div>
-                    <form action="addCategory.php" method="POST" enctype="multipart/form-data">
-                        <div class="card-body">
-                            <div class="mb-1">
-                                <label for="i_ItemName" class="form-label">Category Name</label>
-                                <input name="itemname" id="c_Catname " type="text" class="form-control">
-                            </div>
-                            <div class="mb-1">
-                                <label for="" class="form-label">Image</label>
-                                <input name="itemimagefile" type="file" class="form-control">
-                            </div>
-                            <div class="mb-1">
-                                <label for="" class="form-label">Status</label>
-                                <select name="itemstatus" id="" class="form-select">
-                                    <option value="A">Active</option>
-                                    <option value="D">Discontinued</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-outline-primary"> <i class="bi bi-save"></i> Save </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container-fluid" id="item_list">
-
-
-        <?php
-$category_list = getCategories($conn);
-if(!isset($searchkey)){
-    if(!empty($category_list) || $category_list !== false){
-        foreach($category_list as $categ_key => $cat){ ?>
-        <div class="row mt-3 p-3 rounded-2 border border-bottom-0 border-info">
-            <marker id="cat<?php echo $cat['cat_id']; ?>" class=' mt-5 mb-5'></marker>
-
-            <div class="col-lg-3 col-sm-12 mb-0">
-                <h3 class="display-6"><?php echo $cat['cat_desc']; ?></h3>
-            </div>
-
-            <div class="col-lg-4 col-sm-12 mt-0">
-                <table class="table table-hover table-responsive text-sm">
-                    <thead>
-                        <th>Date</th>
-                        <th>Net Sales</th>
-                        <th>Total Item Ordered</th>
-
-                    </thead>
-                    <?php
-                //sales perf                          
-               $cat_sales = getSalesPerfCat($conn, $cat['cat_id']); 
-               if(!count($cat_sales)){ ?>
-                    <tr>
-                        <td colspan="3">No Data Found</td>
-                    </tr>
-                    <?php }
-               else{
-                foreach($cat_sales as $sales => $prop){ ?>
-                    <tr>
-                        <td><?php echo $prop['date_ordered'];?> </td>
-                        <td><?php echo nf2($prop['total_net_sale']);?> </td>
-                        <td><?php echo $prop['total_item_ordered'];?> </td>
-
-                    </tr>
-                    <?php    }
-               }
-                    ?>
-                </table>
-
-            </div>
-        </div>
-        <div class="row p-3 rounded-2 border-top-0 border border-info">
-            <?php
-             $menu = showMenu($conn, $cat['cat_id']);
-             if(!empty($menu) || $menu !== false ){
-                foreach($menu as $key => $val){ ?>
-
-
-            <?php }
-             }
-             else{
-                 echo "<h4> No Records Found.</h4>";
-             }   ?>
-        </div>
-        <?php }
-    }
-} else{  ?>
-        <div class="row mt-3" id="resultSetSearch">
-            <?php
-            echo "<p class='lead'>Result for {$searchkey}:</p><hr>";
-             $menu = showMenu($conn, null, $searchkey);
-             if(!empty($menu) || $menu !== false ){
-                foreach($menu as $key => $val){ ?>
-            <div class="col-lg-2 col-md-6 col-sm-6">
-
-                <div class="card">
-                    <img src="../images/<?php echo $val['item_img'] == '' ? "200x200.png" : $val['item_img']; ?>" alt="1 x 1" class="card-img-top" style=" height: 300px; width=300px; object-fit: cover">
+                    
+                }
+                ?>
+                <div class="card bg-light">
                     <div class="card-body">
-
-                        <form action="../includes/deleteitem.php" method="post">
-                            <input class="form-control mb-1" type="hidden" name="item_id" id="item_id" value="<?php echo $val['item_id']; ?>">
-                            <div class="form-floating">
-                                <input id="itemname<?php echo $val['item_id']; ?>" class="form-control" type="text" name="item_id" value="<?php echo $val['item_name']; ?>">
-                                <label class="form-label" for="itemname<?php echo $val['item_id']; ?>">Item Name</label>
+                        <form action="" method="get">
+                            <div class="input-group mt-3">
+                                <span class="input-group-text">Item</span>
+                                <input value="<?php echo $it; ?>" type="text" id="f_item" class="form-control" name="f_item">
                             </div>
-                            <div class="form-floating">
-                                <input id="itemprice<?php echo $val['item_id']; ?>" class="form-control mb-1" type="number" name="item_price" value="<?php echo $val['item_price']; ?>">
-                                <label class="form-label" for="itemprice<?php echo $val['item_id']; ?>">Item Price</label>
+                            <div class="input-group mt-3">
+                                <span class="input-group-text">Start Date</span>
+                                <input value="<?php echo $sd; ?>" required type="date" id="f_date1" class="form-control" name="f_date1">
                             </div>
-                            <div class="form-floating">
-                                <input id="itemsc<?php echo $val['item_id']; ?>" class="form-control mb-1" type="text" name="item_short_code" value="<?php echo $val['item_short_code']; ?>">
-                                <label class="form-label" for="itemsc<?php echo $val['item_id']; ?>">Item Short Code</label>
+                            <div class="input-group mt-3">
+                                <span class="input-group-text">End Date</span>
+                                <input value="<?php echo $ed; ?>" required type="date" id="f_date2" class="form-control" name="f_date2">
                             </div>
-                            <button type="submit" class="btn btn-outline-success position-absolute top-100 start-50 translate-middle" title="Update <?php echo $val['item_name']; ?>"> <i class="bi bi-arrow-counterclockwise"></i> </button>
+                            <div class="mt-3">
+                                <button name="f" value="filter" class="btn btn-outline-primary">Filter Data</button>
+                            </div>
                         </form>
-                        <a class="btn btn-outline-danger position-absolute top-50 start-50 translate-middle" title="Remove <?php echo $val['item_name']; ?>"> <i class="bi bi-x"></i> </a>
+                    </div>
 
+
+                </div>
+
+            </div>
+            <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <?php 
+                 if(isset($_GET['f'])){ //this means the filter button has been triggered
+                        $item=null;
+                        $item_info = query($conn, "SELECT * FROM `items`");
+                        $where=null;
+                        if(isset($_GET['f_item'])){
+                            $item = htmlentities($_GET['f_item']);
+                            $s = "%{$item}%";
+                            $item_info = query($conn, "SELECT * FROM `items` WHERE item_name LIKE ? ;" , array($s));
+                        }
+                        $start_date = htmlentities($_GET['f_date1']);
+                        $end_date = htmlentities($_GET['f_date2']); ?>
+
+                <p class="lead">Results for <?php echo $start_date;?> to <?php echo $end_date; echo $item == NULL ? '' : " and items similar to `{$item}`"; ?></p>
+                <?php foreach($item_info as $k => $item){ 
+                   $sales_info = getSalesPerfItem($conn, $item['item_id'], array($start_date, $end_date)); 
+                ?>
+                <h3 class="display-6"><?php echo $item['item_name'];?> </h3>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <th>Transaction Date</th>
+                            <th>Net Sales</th>
+                            <th>Total Count Ordered</th>
+                        </thead>
+                        <?php  if(!empty($sales_info)){  ?>
+                        <tbody>
+                            <?php foreach($sales_info as $s => $sale){ ?>
+                            <tr class="text-success">
+                                <td><?php echo $sale['date_ordered'];?></td>
+                                <td><?php echo $sale['total_net_sale'];?></td>
+                                <td><?php echo $sale['total_item_ordered'];?></td>
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                        <?php } else{ ?>
+                        <tbody>
+                            <tr>
+                                <td colspan="3">
+                                    <p class="text-danger">No Sales Available</p>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                        <?php } ?>
+                    </table>
+                </div>
+
+                <?php
+                 }
+            } //end filter result
+                
+                
+            if(isset($_GET['cat'])){ //sales for category
+                $catid=htmlentities($_GET['cat']);
+                if($catid !== 'all'){ ?>
+
+                <h3><?php echo htmlentities($_GET['cat_n'] === NULL ? '' : $_GET['cat_n']);?></h3>
+
+                <?php $catSales = getSalesPerfCat($conn, $catid); 
+                    if(!empty($catSales)){ //sales not empty
+                ?>
+                <table class="table table-responsive">
+                    <thead>
+                        <th>Transction Date</th>
+                        <th>Net Sales</th>
+                        <th>Order Qty</th>
+                    </thead>
+                    <?php foreach($catSales as $k => $cs){
+                        
+                        
+                    } ?>
+                </table>
+                <?php
+                    } //sales not empty
+                    else{ ?>
+                <p class="lead">No Sales</p>
+                <?php }
+                }
+                else{ ?>
+                <h3><?php echo htmlentities($_GET['cat_n'] === NULL ? '' : $_GET['cat_n']);?></h3>
+                <?php $catSales = getSalesPerfCat($conn); ?>
+                <div class="container-fluid">
+                    <div class="row align-items-start ">
+                        <?php foreach($catSales as $k => $cs){ ?>
+                        <div class="col-lg-3 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title"><?php echo $cs['cat_desc'];?></h3>
+                                </div>
+                                <div class="card-body">
+
+                                </div>
+                                <div class="card-footer">
+
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <?php } ?>
                     </div>
                 </div>
-            </div>
 
-            <?php }
-             }
-             else{
-                 echo "<h4> No Records Found.</h4>";
-             }   ?>
+                <?php }
+                
+                
+                
+            }
+                ?>
+
+            </div>
         </div>
-        <?php } ?>
 
     </div>
+
+
 
 </body>
 <?php mysqli_close($conn);?>

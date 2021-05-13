@@ -129,8 +129,9 @@ function showMenu($conn, $cat = null, $searchkey = null){
 }
 
 
-function getSalesPerfCat($conn, $cat_id){
-    $sql="SELECT c.date_ordered
+function getSalesPerfCat($conn, $cat_id = null, $date = null){
+if($date == null && $cat_id != null){
+     $sql="SELECT c.date_ordered
                , sum(i.item_price * c.item_qty ) total_net_sale
                , count(c.item_id) total_item_ordered
             from `cart` c
@@ -139,36 +140,131 @@ function getSalesPerfCat($conn, $cat_id){
            WHERE i.cat_id = ?
              AND c.confirm = 'Y'
              AND c.status IN ('C','X')
-             GROUP BY c.date_ordered
+             GROUP BY c.date_ordered 
              ORDER BY c.date_ordered DESC
-             
-             LIMIT 5;
+             LIMIT 30;
     ";
     $params = array();
     array_push($params, $cat_id);
+    
     return query($conn, $sql, $params );
+} 
+else if($date != null && $cat_id != null) {
+        $sql="SELECT  c.date_ordered 
+               , sum(i.item_price * c.item_qty ) total_net_sale
+               , count(c.item_id) total_item_ordered
+            from `cart` c
+            join `items` i
+              on (c.item_id = i.item_id)
+           WHERE i.cat_id = ?
+             AND c.date_ordered = ?
+             AND c.confirm = 'Y'
+             AND c.status IN ('C','X')
+             GROUP BY c.date_ordered 
+             ORDER BY c.date_ordered DESC
+             LIMIT 30;
+    ";
+    $params = array();
+    array_push($params, $cat_id, $date);
+    
+    return query($conn, $sql, $params );
+}
+else{
+     $sql="SELECT ct.cat_desc
+               , c.date_ordered 
+               , sum(i.item_price * c.item_qty ) total_net_sale
+               , count(c.item_id) total_item_ordered
+            from `cart` c
+            join `items` i
+              on (c.item_id = i.item_id)
+            join `category` ct
+              on (i.cat_id = ct.cat_id)
+           WHERE c.date_ordered > CURRENT_DATE - 31
+             AND c.confirm = 'Y'
+             AND c.status IN ('C','X')
+             GROUP BY c.date_ordered , ct.cat_desc
+             ORDER BY c.date_ordered DESC
+             LIMIT 30;
+    ";
+    
+    return query($conn, $sql);
+}
+   
     
 }
 
-function getSalesPerfItem($conn, $item_id){
-$sql="SELECT c.date_ordered
-, sum(i.item_price * c.item_qty ) total_net_sale
-, count(c.item_id) total_item_ordered
-from `cart` c
-join `items` i
-on (c.item_id = i.item_id)
-WHERE i.item_id = ?
-AND c.confirm = 'Y'
-AND c.status IN ('C','X')
-GROUP BY c.date_ordered
-ORDER BY c.date_ordered DESC
-
-LIMIT 5;
-";
-$params = array();
-array_push($params, $item_id);
-return query($conn, $sql, $params );
-
+function getSalesPerfItem($conn, $item_id = NULL, $date = array()){
+    
+    if($item_id == NULL){
+        $sql="SELECT c.date_ordered
+                    , ct.cat_desc
+                    , i.item_name
+                    , sum(i.item_price * c.item_qty ) total_net_sale
+                    , count(c.item_id) total_item_ordered
+                    from `cart` c
+                    join `items` i
+                    on (c.item_id = i.item_id)
+                    JOIN `category` ct
+                      ON (i.cat_id = ct.cat_id)
+                    WHERE i.item_id = ?
+                    AND c.confirm = 'Y'
+                    AND c.status IN ('C','X')
+                    GROUP BY i.item_name, c.date_ordered, ct.cat_desc
+                   ORDER BY c.date_ordered DESC, i.cat_id ASC, i.item_name ASC
+                   ;";
+       $params = array();
+       array_push($params, $item_id);
+    }
+    else{
+ 
+        $datefilter=null;
+        $params = array();
+        switch(count($date)){
+            case 1: 
+                $datefilter=" AND c.date_ordered = ? ";
+                array_push($params, $item_id, $date[0]);
+                break;
+            case 2: 
+                $datefilter=" AND c.date_ordered between ? AND ? ";
+                array_push($params, $item_id, $date[0], $date[1]);
+                break;
+            case 0: break;
+            default: 
+                $datefilter=" AND c.date_ordered IN ( ";
+                $x=1;
+                foreach($date as $d){ 
+                   if($x === 1){
+                      $datefilter .= "?";    
+                   }else{
+                       $datefilter .= ",?";
+                   }
+                   array_push($params,$item_id,$d);
+                $x++;
+                }
+                $datefilter.= ") ";
+                break;
+        }
+       
+        $sql="SELECT c.date_ordered
+                    , i.item_name
+                    , ct.cat_desc
+                    , sum(i.item_price * c.item_qty ) total_net_sale
+                    , count(c.item_id) total_item_ordered
+                    from `cart` c
+                    join `items` i
+                    on (c.item_id = i.item_id)
+                    JOIN `category` ct
+                      ON (i.cat_id = ct.cat_id)
+                    WHERE i.item_id = ?
+                    {$datefilter}
+                    AND c.confirm = 'Y'
+                    AND c.status IN ('C','X')
+                    GROUP BY c.date_ordered, i.item_name , ct.cat_desc
+                    ORDER BY c.date_ordered DESC, i.cat_id ASC, i.item_name ASC
+                    ;";
+    }
+    
+    return query($conn, $sql, $params);
 }
 
 
