@@ -179,20 +179,44 @@ if (isset($_GET['searchkey'])){
                 <?php }
                 }
                 else{ ?>
-                <h3><?php echo htmlentities($_GET['cat_n'] === NULL ? '' : $_GET['cat_n']);?></h3>
-                <?php $catSales = getSalesPerfCat($conn); ?>
+                <h3><?php echo htmlentities($_GET['cat_n'] === NULL ? '' : $_GET['cat_n']);?>
+                    <span class="lead">( Sales performance from Day -30)</span>
+                </h3>
+                <?php $categ = query($conn, "SELECT * FROM `category`; "); ?>
                 <div class="container-fluid">
-                    <div class="row align-items-start ">
-                        <?php foreach($catSales as $k => $cs){ ?>
+                    <div class="row align-items-start">
+
+                        <?php foreach($categ as $k => $c){
+                        $tot_cat_sale = 0.00;?>
+
                         <div class="col-lg-3 mb-4">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title"><?php echo $cs['cat_desc'];?></h3>
+                                    <h3 class="card-title"><?php echo $c['cat_desc'];?></h3>
                                 </div>
                                 <div class="card-body">
-
+                                    <div class="list-group">
+                                        <?php $item_categ = query($conn, "SELECT * FROM `items` WHERE cat_id = ?; ", array($c['cat_id']));
+                                    foreach($item_categ as $x => $ic){ ?>
+                                        <span class="list-group-item">
+                                            <?php
+                                    $item_sale =  query($conn, "SELECT sum(i.item_price * c.item_qty) total_net_sales, sum(c.item_qty) total_ordered  FROM `cart` c JOIN `items` i on (i.item_id = c.item_id) WHERE i.item_id = ? and c.status in ('C','X') and confirm = 'Y' and date_ordered >= CURRENT_DATE - 30; ", array($ic['item_id'])); 
+                                    
+                                    foreach($item_sale as $s => $sale){    ?>
+                                            <span class="badge badge-pill <?php echo $sale['total_ordered'] <= 0.00 ? 'bg-secondary' : 'bg-danger';?> float-start"><?php echo $sale['total_ordered']; ?></span>
+                                            <?php echo $ic['item_name'];?>
+                                            <span class="float-end <?php echo $sale['total_net_sales'] <= 0.00 ? 'text-danger' : 'text-success';?>"><?php echo nf2( $sale['total_net_sales'] ); ?></span>
+                                            <?php
+                                                                       $tot_cat_sale += $sale['total_net_sales'];
+                                                                      } ?>
+                                        </span>
+                                        <?php }
+                                                                      
+                                    ?>
+                                    </div>
                                 </div>
                                 <div class="card-footer">
+                                    <span class="lead">Total: <?php echo nf2($tot_cat_sale); ?></span>
 
                                 </div>
 
