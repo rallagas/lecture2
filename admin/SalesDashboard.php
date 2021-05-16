@@ -167,10 +167,14 @@ if (isset($_GET['searchkey'])){
                         <th>Net Sales</th>
                         <th>Order Qty</th>
                     </thead>
-                    <?php foreach($catSales as $k => $cs){
-                        
-                        
-                    } ?>
+                    <?php foreach($catSales as $k => $cs){ ?>
+                    <tr>
+                        <td><?php ?></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <?php } ?>
                 </table>
                 <?php
                     } //sales not empty
