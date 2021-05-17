@@ -10,9 +10,11 @@
             if($cnt_p > 0){
                 foreach($params as $param){
                     $str .= "s";
+                    
                 }
                  mysqli_stmt_bind_param($stmt, "{$str}" , ...$params );
             }
+            
             
             if(mysqli_stmt_execute($stmt)){
                  $resultData = mysqli_stmt_get_result($stmt);
@@ -60,26 +62,45 @@
         return false;
     }
     
-//     function update($table, $id, $fields){
-//        $set = '';
-//        $x = 1;
-//        
-//        foreach($fields as $name => $value){
-//            $set .= "{$name} = ?";
-//            if($x < count($fields)){
-//                $set .= ', ';
-//            }
-//            $x++;
-//        }
-//        
-//        $sql = "UPDATE {$table} SET {$set} WHERE id = {$id}";
-//         
-//        if(!$this->query($sql,$fields)->error()){
-//               return true;
-//           }
-//        return false;
-//        
-//    }
+     function update($conn,$table, $fields, $filter = array(), $op = array() ){
+        $set = '';
+        $where = '';
+        $x = 1;
+        $new_fields = array();
+        
+        foreach($fields as $name => $value){
+            array_push($new_fields, $value);
+            $set .= " {$name} = ? ";
+            if($x < count($fields)){
+                $set .= ', ';
+            }
+            $x++;
+        }
+         $x = 0;
+         if(!empty($filter)){
+             $where = ' WHERE ';
+             foreach($filter as $col => $f_val){
+                 array_push($new_fields, $f_val);
+                 $where .= " {$col} = ? ";
+                 if($x < count($op) ){
+                     $where .= $op[$x];
+                 }
+             $x++;
+             }
+        
+         }
+         
+         
+        
+        $sql = "UPDATE {$table} SET {$set} {$where}; ";
+        
+        if(query($conn,$sql,$new_fields)){
+               
+               return true;
+           }
+        return false;
+        
+    }
 
 
 function get($conn, $table, $where = array() ){
