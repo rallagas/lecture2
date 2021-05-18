@@ -12,3 +12,6 @@ $_GLOBAL['db'] = $conn;
 if (!$conn){
     die("Maintenance Mode.");
 }
+
+session_start();
+include_once "utilities.inc.php";
