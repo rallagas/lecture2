@@ -204,7 +204,6 @@ if (isset($_GET['searchkey'])){
             </div>
         </div>
     </div>
-
     <div class="container-fluid" id="item_list">
 
 
@@ -319,7 +318,7 @@ if(!isset($searchkey)){
         <?php } ?>
 
     </div>
-    </div>
+
 
 </body>
 <?php mysqli_close($conn);?>

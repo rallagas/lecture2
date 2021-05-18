@@ -38,6 +38,7 @@ if(isset($_GET['order_done']) && isset($_SESSION['place_order'])){
                 <h4 class="display-4 text-light">Orders to Receive </h4>
                 <table class="table table-hover table-responsive bg-light shadow mb-3">
                     <thead class="bg-warning">
+                        <th>Date</th>
                         <th>Order Number</th>
                         <th>Quantity</th>
                         <th>Total Amount to Pay</th>
@@ -45,15 +46,17 @@ if(isset($_GET['order_done']) && isset($_SESSION['place_order'])){
                     </thead>
                     <tbody>
                         <?php   
-                        $checkouts = getOrderList($conn, $_SESSION['user_id'],'C');
+                        $checkouts = getOrderList($conn, 'W', $_SESSION['user_id']);
                         $total = array('amt' => 0.00, 'qty' => 0);
                         foreach($checkouts as $chk_key => $chk){ ?>
                         <tr>
+                            <td class="align-middle"><?php echo $chk['date_ordered']; ?></td>
                             <td class="align-middle"><?php echo $chk['order_ref_num']; ?></td>
                             <td class="align-middle"><?php echo $chk['total_item_qty'] . pcpcs($chk['total_item_qty']); ?></td>
                             <td class="align-middle"><?php echo  nf2($chk['total_amt_to_pay']); ?></td>
                             <td><?php switch($chk['status']){
                                         case 'X': echo 'Delivered and Paid'; break;
+                                        case 'W': echo 'Processing'; break;
                                         case 'C': echo 'Checked Out and Waiting to be Delivered'; break;
                                 } ?>
                             </td>
@@ -65,7 +68,7 @@ if(isset($_GET['order_done']) && isset($_SESSION['place_order'])){
                             
                         ?>
                         <tr class="bg-warning">
-                            <td class="text-center">Total:</td>
+                            <td colspan="2" class="text-center">Total:</td>
                             <td><b><?php echo $total['qty'] . pcpcs($total['qty']); ?></b></td>
                             <td colspan="2"><b class='text-danger'><?php echo "Php ".number_format($total['amt'],2); ?></b></td>
 
@@ -85,6 +88,7 @@ if(isset($_GET['order_done']) && isset($_SESSION['place_order'])){
                 <h4 class="display-4 text-light">Historical Orders</h4>
                 <table class="table table-hover table-responsive bg-light shadow mb-3">
                     <thead class="bg-warning">
+                        <th>Date</th>
                         <th>Order Number</th>
                         <th>Quantity</th>
                         <th>Total Amount Paid</th>
@@ -92,15 +96,17 @@ if(isset($_GET['order_done']) && isset($_SESSION['place_order'])){
                     </thead>
                     <tbody>
                         <?php   
-                        $checkouts = getOrderList($conn, $_SESSION['user_id'],'X');
+                        $checkouts = getOrderList($conn, 'X' ,$_SESSION['user_id']);
                         $total = array('amt' => 0.00, 'qty' => 0);
                         foreach($checkouts as $chk_key => $chk){ ?>
                         <tr>
+                            <td class="align-middle"><?php echo $chk['date_ordered']; ?></td>
                             <td class="align-middle"><?php echo $chk['order_ref_num']; ?></td>
                             <td class="align-middle"><?php echo $chk['total_item_qty'] . pcpcs($chk['total_item_qty']); ?></td>
                             <td class="align-middle"><?php echo  nf2($chk['total_amt_to_pay']); ?></td>
                             <td><?php switch($chk['status']){
                                         case 'X': echo 'Delivered and Paid'; break;
+                                        case 'W': echo 'Processing Order'; break;
                                         case 'C': echo 'Checked Out and Waiting to be Delivered'; break;
                                 } ?>
                             </td>
