@@ -10,6 +10,7 @@ include_once "../includes/func.inc.php";
     <title>Lecture : SQL Integration with PHP</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/custom.css">
     <link rel="stylesheet" href="../font/bootstrap-icons.css">
     <link href="../css/sidebars.css" rel="stylesheet">
 
@@ -30,21 +31,21 @@ include_once "../includes/func.inc.php";
                     </a>
                     <?php include_once "sidebar_nav.php";?>
                 </div>
-                <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white col-3 mt-2 px-4 shadow">
 
+                <div class="d-flex flex-column align-items-stretch bg-light flex-shrink-0 col-3 pt-3 px-4 shadow">
                     <form action="">
                         <div class="input-group w-100">
                             <input type="text" class="form-control" name="search_key">
                             <button class="btn btn-secondary"><i class="bi bi-search"></i></button>
                         </div>
-
                     </form>
                     <div class="list-group list-group-flush border-bottom scrollarea">
                         <?php 
                         if(isset($_GET['search_key'])){
                             $str = cleanstr($_GET['search_key']);
                             $items = showMenu($conn,null,$str);
-                        }else{
+                        }
+                        else {
                             $items = showMenu($conn);
                         }
                             
@@ -59,15 +60,27 @@ include_once "../includes/func.inc.php";
                                     <span class="badge rounded-pill bg-secondary"><?php echo nf2($item['item_price']);?></span>
 
                                 </strong>
-                                <small><?php echo $item['item_short_code'];?></small>
+                                <small> <a href="?viewitem=<?php echo $item['item_id'];?>"><i class="bi bi-chevron-right"></i></a></small>
                             </div>
                         </span>
 
-                        <?php }
-            ?>
-
+                        <?php } ?>
                     </div>
                 </div>
+                <div class="d-flex flex-column align-items-stretch flex-shrink-0 col-7 pt-3 px-4 shadow">
+                    <?php
+                        if(isset($_GET['viewitem'])){
+                            query($conn
+                                , "SELECT 
+                                     FROM `cart` c
+                                     JOIN `items` i
+                                       ON (i.item_id = c.item_id)
+                                   "
+                                , array());
+                        }
+                    ?>
+                </div>
+
             </main>
         </div>
     </div>
