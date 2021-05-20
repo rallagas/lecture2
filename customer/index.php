@@ -1,5 +1,8 @@
 <?php
-session_start();
+
+include_once "../includes/db_conn.php";
+include_once "../includes/func.inc.php";
+
 if(isset($_SESSION['user_type']) && isset($_SESSION['user_id'])){
     if($_SESSION['user_type'] == 'A'){
         header("location: ../admin/?error=cannotgothere");
@@ -9,8 +12,6 @@ else{
     header("location: ../?error=cannotgothere");
 }
 
-include_once "../includes/db_conn.php";
-include_once "../includes/func.inc.php";
 $page='index';
 $searchkey=NULL;
 if (isset($_GET['searchkey'])){
@@ -43,7 +44,7 @@ if (isset($_GET['searchkey'])){
                             <p class="lead text-dark">
                                 <?php $summary = getCartSummary($conn, $_SESSION['user_id']); 
                                     if(!empty($summary)){ ?>
-                                <a href="checkout.php" class="btn btn-outline-light border-3 text-danger fs-4 mt-3"> <i class="bi bi-cash"></i> Checkout </a>
+                                <a href="checkout.php" class="btn btn-outline-light border-3 text-danger fs-4 mt-3"> Checkout <i class="bi bi-chevron-right"></i> </a>
                                 <br>
                                 <?php foreach($summary as $key => $nval){
                                            echo "Total Qty: ". $nval['total_qty'] . " pcs |";  
@@ -62,7 +63,7 @@ if (isset($_GET['searchkey'])){
                             <div class="card shadow">
                                 <img src="../images/<?php echo $cart['item_img'] == '' ? "200x200.png" : $cart['item_img']; ?>" alt="1 x 1" class="card-img-top" style=" height: 150px; width=100px; object-fit: cover">
                                 <div class="card-body">
-                                    <h6 class="card-title"><?php echo $cart['item_name'] ;?> </h6>
+                                    <h6 class="card-title"> <?php echo $cart['item_name'] ;?> </h6>
                                     <span class='fs-6'><?php
                                                          echo "Php " . number_format($cart['item_price'],2)  
                                                                      . " x ". $cart['total_item_qty'] . ($cart['total_item_qty'] > 1 ? ' pcs' : ' pc') ;
@@ -115,7 +116,7 @@ if(!isset($searchkey)){
                 foreach($menu as $key => $val){ ?>
                                     <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
 
-                                        <div class="card">
+                                        <div class="card" id="item<?php echo $val['item_id']; ?>">
                                             <img src="../images/<?php echo $val['item_img'] == '' ? "200x200.png" : $val['item_img']; ?>" alt="1 x 1" class="card-img-top" style=" height: 300px; width=300px; object-fit: cover">
 
                                             <div class="card-body">

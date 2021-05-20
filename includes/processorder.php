@@ -15,5 +15,5 @@ if(isset($_GET['item_id'])){
         }
         mysqli_stmt_bind_param($stmt_ins,"sss",$item_id,$cust_id,$item_qty);
         mysqli_stmt_execute($stmt_ins);
-        header("location: ../customer/index.php?success=1");
+        header("location: ../customer/index.php?success=1#item{$item_id}");
     }

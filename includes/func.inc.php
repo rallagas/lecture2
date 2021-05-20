@@ -298,6 +298,37 @@ function getTotalsPerStat($conn, $status) {
         
     
 }
+function getTotals($conn, $time_param = null){
+    
+    if($time_param !== NULL){
+            $params = array($time_param,$time_param,$time_param);
+            return query(  $conn
+                 , "SELECT sum(item_qty) item_qty
+                              , sum(i.item_price * c.item_qty) sales
+                           FROM `lu_day` t
+                           JOIN `cart` c
+                             on c.date_ordered = t.date
+                           JOIN `items` i
+                             on c.item_id = i.item_id
+                          WHERE (t.year_id = ?
+                             OR  t.date = ?
+                             OR  t.week_id = ?
+                            )
+                          ;"
+                 , $params);
+    }else{
+        return query(  $conn, "SELECT sum(item_qty) item_qty
+                              , sum(i.item_price * c.item_qty) sales
+                           FROM `lu_day` t
+                           JOIN `cart` c
+                             on c.date_ordered = t.date
+                           JOIN `items` i
+                             on c.item_id = i.item_id
+                          ;" );
+    }
+    
+    
+}
 function getRandom(){
     $r = null;
     $characters = array(1=>'A',

@@ -5,8 +5,8 @@
         </button>
         <div class="collapse show" id="home-collapse">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                <li><a href="items.php?overview" class="link-dark rounded">Overview</a></li>
-                <li><a href="items.php" class="link-dark rounded">Items</a></li>
+                <li><a href="index.php?overview" class="link-dark rounded">Overview</a></li>
+                <li><a href="control_dashboard.php" class="link-dark rounded">Items</a></li>
             </ul>
         </div>
     </li>
@@ -23,7 +23,7 @@
                  $category_list = getCategories($conn);
                  if(!empty($category_list) || $category_list !== false){
                      foreach($category_list as $kc => $cat){ ?>
-                <li><a href="items.php?cat_id=<?php echo $cat['cat_id'];?>&catname=<?php echo $cat['cat_desc'];?>" class="link-dark rounded"><?php echo $cat['cat_desc'];?></a></li>
+                <li><a href="index.php?cat_id=<?php echo $cat['cat_id'];?>&catname=<?php echo $cat['cat_desc'];?>" class="link-dark rounded"><?php echo $cat['cat_desc'];?></a></li>
                 <?php }
                         
                  }
@@ -39,9 +39,10 @@
         <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
             Dashboard
         </button>
-        <div class="collapse" id="dashboard-collapse">
+        <div class="collapse show" id="dashboard-collapse">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                 <li><a href="index.php?overview" class="link-dark rounded">Overview</a></li>
+                <li><a href="salesdashboard2.php?timeframe=D" class="link-dark rounded">Daily</a></li>
                 <li><a href="salesdashboard2.php?timeframe=W" class="link-dark rounded">Weekly</a></li>
                 <li><a href="salesdashboard2.php?timeframe=M" class="link-dark rounded">Monthly</a></li>
                 <li><a href="salesdashboard2.php?timeframe=A" class="link-dark rounded">Annually</a></li>
@@ -52,7 +53,7 @@
         <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
             Orders
         </button>
-        <div class="collapse" id="orders-collapse">
+        <div class="collapse show" id="orders-collapse">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                 <li><a href="orders.php" class="link-dark rounded">All</a></li>
                 <!--

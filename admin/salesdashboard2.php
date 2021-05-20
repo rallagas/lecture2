@@ -1,5 +1,4 @@
 <?php
-session_start();
 include_once "../includes/db_conn.php";
 include_once "../includes/utilities.inc.php";
 include_once "../includes/func.inc.php";
@@ -25,8 +24,8 @@ include_once "../includes/func.inc.php";
     <main>
         <div class="container-fluid">
             <div class="row">
-                <div class="flex-shrink-0 p-3 bg-white col-3">
-                    <a href="/" class="d-flex align-items-center pb-3 mb-3 link-dark text-decoration-none border-bottom">
+                <div class="flex-shrink-0 p-3 bg-white col-3 m-0 border-end">
+                    <a href="/" class="d-flex align-items-center pb-3 mb-3 link-dark text-decoration-none ">
                         <svg class="bi me-2" width="30" height="24">
                             <use xlink:href="#bootstrap" />
                         </svg>
@@ -41,12 +40,76 @@ include_once "../includes/func.inc.php";
                         <span class="fs-5 fw-semibold">
                             <?php 
                             if(isset($_GET['timeframe'])){
+                                
+                                 $totals = getTotals($conn);
+                                $total_sale = NULL;
+                                $total_qty = NULL;
+                                            foreach($totals as $tk => $total){
+                                                $total_sale = $total['sales'];
+                                                $total_qty = $total['item_qty'];      
+                                            }
+                                
                                 switch(cleanstr($_GET['timeframe'])){
+                                    case 'D': echo "Daily ";
+                                             $sql = "SELECT t.date _when
+                                                          , t.year_id
+                                                          , sum(item_qty) item_qty
+                                                          , sum(i.item_price * c.item_qty) sale
+                                                       FROM `lu_day` t
+                                                       JOIN `cart` c
+                                                         on c.date_ordered = t.date
+                                                       JOIN `items` i
+                                                         on c.item_id = i.item_id
+                                                      GROUP BY t.date , year_id
+                                                      ORDER BY t.date ASC ;
+                                                    ";
+                                            
+                                            $prefix = null;
+                                        break;
                                     case 'W': echo "Weekly";
+                                             $sql = "SELECT t.week_id _when
+                                                          , t.year_id
+                                                          , sum(item_qty) item_qty
+                                                          , sum(i.item_price * c.item_qty) sale
+                                                       FROM `lu_day` t
+                                                       JOIN `cart` c
+                                                         on c.date_ordered = t.date
+                                                       JOIN `items` i
+                                                         on c.item_id = i.item_id
+                                                      GROUP BY t.week_id , year_id
+                                                      ORDER BY t.week_id ASC ;
+                                                    ";
+                                            
+                                            $prefix = "Week ";
                                         break;
                                     case 'M': echo "Monthly";
+                                         $sql = "SELECT t.period_id _when
+                                                          , t.year_id
+                                                          , sum(item_qty) item_qty
+                                                          , sum(i.item_price * c.item_qty) sale
+                                                       FROM `lu_day` t
+                                                       JOIN `cart` c
+                                                         on c.date_ordered = t.date
+                                                       JOIN `items` i
+                                                         on c.item_id = i.item_id
+                                                      GROUP BY t.period_id , year_id
+                                                      ORDER BY t.period_id ASC ;
+                                                    ";
+                                            $prefix = "Period ";
                                         break;
                                     case 'A': echo "Annually";
+                                         $sql = "SELECT  t.year_id _when
+                                                          , sum(item_qty) item_qty
+                                                          , sum(i.item_price * c.item_qty) sale
+                                                       FROM `lu_day` t
+                                                       JOIN `cart` c
+                                                         on c.date_ordered = t.date
+                                                       JOIN `items` i
+                                                         on c.item_id = i.item_id
+                                                      GROUP BY t.year_id
+                                                      ORDER BY t.year_id ASC ;
+                                                    ";
+                                            $prefix = "Year ";
                                         break;
                                 }
                             }
@@ -54,41 +117,30 @@ include_once "../includes/func.inc.php";
                         </span>
                     </span>
                     <div class="list-group list-group-flush border-bottom scrollarea">
-                        <?php 
-            $orders = getOrderList($conn,'W');
-            foreach($orders as $ko => $or) { ?>
+                        <?php
+                        
+                        $sales = query($conn, $sql);
+                        if(!empty($sales) || $sales !== false ){
+                              foreach($sales as $sk => $sale){
+                                    $perc1 = number_format(($sale['sale']/$total_sale),2) * 100.00;
+                                    $perc2 = number_format(($sale['item_qty']/$total_qty),2) * 100.00;
+                           ?>
 
-                        <span class="list-group-item list-group-item-action  py-3 lh-tight" aria-current="true">
-                            <div class="d-flex w-100 align-items-center justify-content-between">
+                        <h4 class="fs-4 fw-light text-dark me-3"><?php echo $prefix . " ". $sale['_when']. " - " . $perc1; ?>%</h4>
+                        <div class="progress mb-1" style="height: 30px">
+                            <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: <?php echo $perc1; ?>%" aria-valuenow="<?php echo $perc1; ?>" aria-valuemin="0" aria-valuemax="100"> <?php echo "Sales :" . nf2($sale['sale']); ?></div>
+                        </div>
+                        <div class="progress" style="height: 30px">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: <?php echo $perc2; ?>%" aria-valuenow="<?php echo $perc2; ?>" aria-valuemin="0" aria-valuemax="100"> <?php echo "Qty :" . $sale['item_qty'] . pcpcs($sale['item_qty']); ?></div>
+                        </div>
+                        <?php } 
+                        }
+                        else{
+                            
+                            echo "No Sales";
+                        }
 
-                                <strong class="mb-1">
-                                    <a href="?deliver_order=<?php echo $or['order_ref_num'] ; ?>" class="btn  btn-outline-primary btn-sm"><i class=" bi bi-check"></i></a>
-                                    <?php echo $or['order_ref_num'];?>
-                                    <span class="badge rounded-pill bg-info"><?php echo nf2($or['total_amt_to_pay']);?></span>
-
-                                </strong>
-                                <small><?php echo $or['last_update_date'];?></small>
-                            </div>
-                            <div class="col-12 mb-1 small">
-                                <div class="list-group">
-
-                                    <?php
-                            $order_details = getCartList($conn, $or['order_ref_num'],'W');
-                            foreach($order_details as $odK => $or_d){ ?>
-                                    <span class="list-group-item">
-                                        <span class="badge rounded-pill bg-info"><?php echo $or_d['total_item_qty']; ?></span>
-
-                                        <?php echo $or_d['item_name']; ?>
-                                    </span>
-                                    <?php }
-                            ?>
-
-                                </div>
-                            </div>
-                        </span>
-
-                        <?php }
-            ?>
+                        ?>
 
                     </div>
                 </div>

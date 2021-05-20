@@ -30,7 +30,7 @@ if (isset($_GET['searchkey'])){
         <div class="row mt-5">
             <div class="col-lg-3"></div>
             <div class="col-lg-7 col-sm-12 col-md-12">
-                <h4 class="display-4 text-light">Checkout </h4>
+                <h4 class="display-4 text-dark fw-bold">Checkout </h4>
                 <table class="table table-hover table-responsive bg-light shadow mb-3">
                     <thead class="bg-warning">
                         <th></th>

@@ -32,6 +32,11 @@
 
                         </ul>
                         <!--Search Bar-->
+
+                        <a href="placeorder.php" class="inline nav-link btn btn-no-border-orange float-end">
+                            <i class="bi bi-cart"></i>
+                        </a>
+
                         <a href="#userprofile" class="nav-link btn float-end" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="userprofile">
                             <i class="bi bi-person"></i> <?php echo getUserFullName($conn,$_SESSION['user_id']); ?>
                         </a>
@@ -57,14 +62,34 @@
                        
                      if($page == 'index'){
                      ?>
+                        <!--
+<a href="#cartList" class="nav-link btn float-end" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="cartList">
+    <i class="bi bi-cart"></i> Cart
+    <span class="badge bg-danger">
+        <?php echo getCartCount($conn,$_SESSION['user_id']);?>
+    </span>
 
-                        <a href="#cartList" class="nav-link btn float-end" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="cartList">
-                            <i class="bi bi-cart"></i> Cart
-                            <span class="badge bg-danger">
-                                <?php echo getCartCount($conn,$_SESSION['user_id']);?>
+</a>
+-->
+
+                        <?php  if($page === 'index'){ ?>
+                        <div class="">
+                            <span class="badge bg-light text-secondary float-end fs-6">
+
+                                <?php $summary = getCartSummary($conn, $_SESSION['user_id']); 
+                                    if(!empty($summary)){
+                                        foreach($summary as $key => $nval){
+                                           echo "Cart: ". $nval['total_qty'] . " pcs (Php ". number_format($nval['total_price'],2) . ")";  
+                                             ?>
+                                <a href="checkout.php" class="btn btn-outline-warning border-1 text-danger"> Checkout <i class="bi bi-chevron-right"></i> </a>
+                                <?php 
+                                        }
+                                    }
+                                    ?>
                             </span>
+                        </div>
+                        <?php } ?>
 
-                        </a>
                         <a href="../jquery_sample/index.php" class="inline nav-link btn btn-no-border-orange float-end">
                             <i class="bi bi-app-indicator"></i>
                         </a>
@@ -79,24 +104,10 @@
                         <!--Search Bar-->
                     </div>
                 </div>
-                <?php  if($page == 'index'){ ?>
-                <div class="col-lg-12 border-top border-warning">
-                    <span class="badge bg-warning text-secondary float-end fs-6">
-
-                        <?php $summary = getCartSummary($conn, $_SESSION['user_id']); 
-                                    if(!empty($summary)){
-                                        foreach($summary as $key => $nval){
-                                           echo "Cart: ". $nval['total_qty'] . " pcs (Php ". number_format($nval['total_price'],2) . ")";  
-                                             ?>
-                        <a href="checkout.php" class="btn btn-outline-light border-1 text-danger"> Checkout <i class="bi bi-chevron-right"></i> </a>
-                        <?php 
-                                        }
-                                    }
-                                    ?>
-                    </span>
-                </div>
-                <?php } ?>
             </div>
+
+
+
 
         </div>
         <br>

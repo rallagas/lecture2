@@ -14,7 +14,7 @@ $user_info = uidExists( $conn, $p_un , $p_pw );
             header("location: ../customer/");
         }
         else if($_SESSION['user_type'] == 'A'){
-            header("location: ../admin/");
+            header("location: ../admin/index.php?overview");
         }
     }
     else{
