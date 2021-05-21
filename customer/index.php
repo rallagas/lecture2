@@ -29,22 +29,21 @@ if (isset($_GET['searchkey'])){
 </head>
 
 <body>
-
-    <div class="container-fluid">
+    <div class="container-fluid noscroll">
         <div class="row pt-5" id="NavigationPanel">
             <?php include_once "cust_nav.php"; ?>
 
         </div>
 
         <div class="row" id="MenuList">
-            <div class="col-2 pt-5 shadow collapse show bg-warning" id="cartList">
-                <div class="container-fluid">
+            <div class="px-0 mx-0 pt-5 col-lg-2 col-sm-12 col-md-12 order-2 bg-light" id="cartList">
+                <div class="container-fluid ">
                     <div class="row">
                         <div class="col-12">
                             <p class="lead text-dark">
                                 <?php $summary = getCartSummary($conn, $_SESSION['user_id']); 
                                     if(!empty($summary)){ ?>
-                                <a href="checkout.php" class="btn btn-outline-light border-3 text-danger fs-4 mt-3"> Checkout <i class="bi bi-chevron-right"></i> </a>
+                                <a href="checkout.php" class="btn btn-outline-danger border-2 text-danger fs-6"> Checkout <i class="bi bi-chevron-right"></i> </a>
                                 <br>
                                 <?php foreach($summary as $key => $nval){
                                            echo "Total Qty: ". $nval['total_qty'] . " pcs |";  
@@ -55,51 +54,58 @@ if (isset($_GET['searchkey'])){
                             </p>
 
                         </div>
-                        <?php
+                        <scroll class="scroll-container p-0">
+                            <div class="scrollable mx-0">
+                                <?php
                       $cart_list = getCartList($conn, $_SESSION['user_id']);
                       if(!empty($cart_list) || $cart_list !== false){
                           foreach($cart_list as $cart_key => $cart) { ?>
-                        <div class="col-12 mb-4">
-                            <div class="card shadow">
-                                <img src="../images/<?php echo $cart['item_img'] == '' ? "200x200.png" : $cart['item_img']; ?>" alt="1 x 1" class="card-img-top" style=" height: 150px; width=100px; object-fit: cover">
-                                <div class="card-body">
-                                    <h6 class="card-title"> <?php echo $cart['item_name'] ;?> </h6>
-                                    <span class='fs-6'><?php
+                                <div class="col-12 mb-4 ">
+                                    <div class="card shadow">
+
+                                        <div class="card-body align-middle">
+                                            <img src="../images/<?php echo $cart['item_img'] == '' ? "200x200.png" : $cart['item_img']; ?>" alt="1 x 1" class="img-responsive border-0 w-25 float-end mt-4" style="object-fit: cover">
+                                            <h6 class="card-title"> <?php echo $cart['item_name'] ;?> </h6>
+                                            <span class='fs-6'><?php
                                                          echo "Php " . number_format($cart['item_price'],2)  
                                                                      . " x ". $cart['total_item_qty'] . ($cart['total_item_qty'] > 1 ? ' pcs' : ' pc') ;
                                                          ?>
-                                        <?php echo "<br>  Total : Php " . number_format($cart['total_order_amt'],2);  ?>
-                                    </span>
-                                    <a href="?deletecartitem=<?php echo $cart['item_id']; ?>" class="position-absolute top-0 start-100 translate-middle bg-light btn-outline-danger" title="Remove from Cart"><i class="bi bi-x"></i></a>
-                                </div>
-                                <div class="card-footer">
+                                                <?php echo "<br>  Total : Php " . number_format($cart['total_order_amt'],2);  ?>
+                                            </span>
+                                            <a href="?deletecartitem=<?php echo $cart['item_id']; ?>" class="position-absolute top-0 start-100 translate-middle bg-light btn-outline-danger" title="Remove from Cart"><i class="bi bi-x"></i></a>
+                                        </div>
+                                        <div class="card-footer">
 
-                                    <?php 
+                                            <?php 
                                        if($cart['confirm'] == 'X'){ ?>
-                                    <a href="?confirmcartitem=<?php echo $cart['item_id']; ?>" class="float-end btn btn-sm btn-outline-light text-dark"> <i class="bi bi-app"></i> </a>
-                                    <?php }
+                                            <a href="?confirmcartitem=<?php echo $cart['item_id']; ?>" class="float-end btn btn-sm btn-outline-light text-dark"> <i class="bi bi-app"></i> </a>
+                                            <?php }
                                             else { ?>
-                                    <a href="?unconfirmcartitem=<?php echo $cart['item_id']; ?>" class="float-end btn btn-sm btn-outline-light text-dark"> <i class="bi bi-check-square"></i> </a>
-                                    <?php }
+                                            <a href="?unconfirmcartitem=<?php echo $cart['item_id']; ?>" class="float-end btn btn-sm btn-outline-light text-dark"> <i class="bi bi-check-square"></i> </a>
+                                            <?php }
                                         ?>
 
-                                </div>
+                                        </div>
 
-                            </div>
-                        </div>
-                        <?php }
+                                    </div>
+                                </div>
+                                <?php }
                                 } ?>
+                            </div>
+                        </scroll>
                     </div>
                 </div>
             </div>
-            <div class="col-10">
-                <div class="container-fluid">
+
+            <div class="px-0 mx-0 col-lg-10 scroll-container">
+
+                <div class="container-fluid scrollable">
                     <?php
 $category_list = getCategories($conn);
 if(!isset($searchkey)){
     if(!empty($category_list) || $category_list !== false){
         foreach($category_list as $categ_key => $cat){ ?>
-                    <div class="row px-3 mb-3">
+                    <div class="row ps-3 pe-0 mb-3">
                         <?php echo "<marker id='cat".$cat['cat_id']."' class='mt-5 mb-5'></marker>"; ?>
 
                         <div class="col-12">
@@ -182,6 +188,7 @@ if(!isset($searchkey)){
                     </div>
 
                 </div>
+
             </div>
 
         </div>

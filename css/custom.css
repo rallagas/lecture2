@@ -1,13 +1,13 @@
-body#bg1 {
+body {
     background-image: none;
-
 }
 
 body {
     background-image: url('../images/bg-theme-3.jpg');
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    background-repeat: repeat;
+    background-attachment: scroll;
 }
+
 
 .fs-7 {
     font-size: 1rem;
@@ -22,4 +22,23 @@ body {
 
 .opacity-1 {
     opacity: 0.5;
+}
+
+.scroll-container {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 100vh;
+    height: -webkit-fill-available;
+    max-height: 95vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.scrollable {
+    overflow-y: auto;
+}
+
+.noscroll {
+    height: 100%;
+    overflow-y: hidden;
 }

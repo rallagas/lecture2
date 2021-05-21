@@ -9,13 +9,11 @@ include_once "includes/func.inc.php";
     <meta charset="UTF-8">
     <title>Lecture : SQL Integration with PHP</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/custom.css">
-    <style>
-        body {
-            background-image: url('images/bg-theme-3.jpg');
-        }
+    <link rel="stylesheet" href="font/bootstrap-icons.css">
 
+    <!--
+    <style>
         img.res {
             object-fit: cover;
             height: 400px;
@@ -23,15 +21,15 @@ include_once "includes/func.inc.php";
         }
 
     </style>
+-->
 </head>
 
 <body id="bg1">
-
     <div class="container-fluid my-5">
-        <div class="row justify-content-end d-flex">
-            <div class="col-9 px-5 border-end border-1">
-                <h1 class="display-1  text-end fw-bold text-danger">Cook-it-yourself</h1>
-                <p class="text-secondary text-end fw-bold fs-4">
+        <div class="row justify-content-between d-flex">
+            <div class="col-lg-9 col-md-12 col-sm-12 px-5 border-end border-1">
+                <h1 class="display-1  justify-content-between  fw-bold text-danger">Cook-it-yourself</h1>
+                <p class="text-secondary fw-bold fs-4">
                     Welcome! to the Ultimate do it yourself experience!
                 </p>
 
@@ -41,8 +39,7 @@ include_once "includes/func.inc.php";
 
                 <div class="container-fluid">
                     <div class="row">
-
-                        <div class="col-lg-12 col-md-6 col-sm-12 mb-3">
+                        <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                             <div class="container-fluid">
                                 <div class="row">
                                     <?php
@@ -62,12 +59,12 @@ include_once "includes/func.inc.php";
                                                LIMIT 10
                                                ;");
                         foreach($bestsellers as $bk => $bs){ ?>
-                                    <div class="col-lg-3 mb-3">
+                                    <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
                                         <div class="card shadow">
                                             <span class="text-light text-bold fs-2 position-absolute top-50 start-50 z-index top">
                                                 <?php echo $bs['item_qty'] . " " . pcpcs($bs['item_qty']) ;?> Sold
                                             </span>
-                                            <img src="images/<?php echo $bs['item_img'];?>" alt="" class="res card-img-top">
+                                            <img src="images/<?php echo $bs['item_img'];?>" alt="" class="res card-img-top img-responsive">
 
                                             <span class="card-title position-absolute top-0 start-50 text-white fw-bold bg-danger text-center p-1"><?php echo $bs['item_name'];?></span>
 
@@ -88,9 +85,9 @@ include_once "includes/func.inc.php";
                     <p class="display-4">Do it yourself! the best experience there is! You order, we deliver!</p>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-lg-3 col-md-6 col-sm-12 order-1">
                 <div class="">
-                    <div class="card-header bg-white">
+                    <div class="card-header">
                         <h3 class="card-title text-danger">Sign In <span class="text-secondary"> to order!</span></h3>
                         <?php
                 if(isset($_GET['signup'])){ ?>
@@ -116,7 +113,7 @@ include_once "includes/func.inc.php";
                             <input name="p_username" type="text" class="form-control mb-3 border-danger" placeholder="username or email address">
                             <input name="p_password" type="password" class="form-control mb-3 border-danger" placeholder="password">
                         </div>
-                        <div class="card-footer pb-n1  bg-white">
+                        <div class="card-footer pb-n1 ">
                             <button class="btn btn-outline-danger text-dark">Login</button>
                             <span class="text-secondary fw-light"> Don't have an account? </span><a href="createaccount/" class="btn text-danger">Sign Up!</a>
                         </div>
@@ -126,6 +123,8 @@ include_once "includes/func.inc.php";
 
 
             </div>
+
+
         </div>
         <div class="footer">
 

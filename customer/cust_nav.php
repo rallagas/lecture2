@@ -81,7 +81,7 @@
                                         foreach($summary as $key => $nval){
                                            echo "Cart: ". $nval['total_qty'] . " pcs (Php ". number_format($nval['total_price'],2) . ")";  
                                              ?>
-                                <a href="checkout.php" class="btn btn-outline-warning border-1 text-danger"> Checkout <i class="bi bi-chevron-right"></i> </a>
+
                                 <?php 
                                         }
                                     }

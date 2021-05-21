@@ -417,7 +417,8 @@ if($userid === null){
                            , c.date_ordered
                            , c.total_amt_to_pay
                            , c.last_update_date
-                        ORDER BY c.date_ordered; ";
+                        ORDER BY c.date_ordered
+                        LIMIT 60; ";
      $stmt=mysqli_stmt_init($conn);
     
                     if (!mysqli_stmt_prepare($stmt, $sql_cart_list)){
